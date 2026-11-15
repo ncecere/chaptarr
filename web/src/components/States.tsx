@@ -42,7 +42,7 @@ export function EmptyState({
           {icon}
         </div>
       )}
-      <h3 className="text-base font-semibold">{title}</h3>
+      <h2 className="text-base font-semibold">{title}</h2>
       {description && <p className="mt-1 max-w-md text-sm text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -69,7 +69,7 @@ export function ErrorState({
       )}
     >
       <CircleAlert className="mb-3 size-6 text-bad" />
-      <h3 className="text-base font-semibold">{title}</h3>
+      <h2 className="text-base font-semibold">{title}</h2>
       {error !== undefined && <p className="mt-1 max-w-lg text-sm text-muted">{errorMessage(error)}</p>}
       {onRetry && (
         <Button className="mt-4" onClick={onRetry}>

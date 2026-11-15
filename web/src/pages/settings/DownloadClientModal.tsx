@@ -57,7 +57,7 @@ export function DownloadClientModal({ client, onClose }: { client?: DownloadClie
           >
             Test
           </Button>
-          <Button onClick={onClose} disabled={save.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
           <Button type="submit" form={formId} variant="primary" loading={save.isPending}>

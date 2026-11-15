@@ -5,9 +5,18 @@ import { useStatus } from '../../lib/queries'
 
 function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-card border border-line bg-surface px-4 py-3">
-      <div className="text-xs text-muted">{label}</div>
-      <div className="mt-0.5 truncate text-lg font-semibold tabular-nums">{children}</div>
+    <div className="bg-surface px-4 py-3.5">
+      <dt className="text-2xs font-medium uppercase tracking-wider text-faint">{label}</dt>
+      <dd className="mt-1 truncate text-xl font-semibold tracking-tight tabular-nums">{children}</dd>
+    </div>
+  )
+}
+
+function Fact({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex min-w-0 items-baseline gap-2">
+      <dt className="shrink-0 text-muted">{label}</dt>
+      <dd className="min-w-0 truncate">{children}</dd>
     </div>
   )
 }
@@ -15,27 +24,34 @@ function Stat({ label, children }: { label: string; children: ReactNode }) {
 export function StatusSummary() {
   const query = useStatus()
   return (
-    <section>
-      <h2 className="mb-3 text-base font-semibold">Status</h2>
+    <section aria-labelledby="system-status">
+      <h2 id="system-status" className="mb-3 text-base font-semibold">
+        Status
+      </h2>
       <QueryView query={query}>
         {(s) => (
-          <>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-              <Stat label="Version">{s.version}</Stat>
+          <div className="overflow-hidden rounded-card border border-line bg-surface">
+            {/* The 1px gaps show the line colour behind the cells, giving hairline dividers at any column count. */}
+            <dl className="grid grid-cols-2 gap-px bg-line sm:grid-cols-3 lg:grid-cols-6">
               <Stat label="Authors">{s.authorCount.toLocaleString()}</Stat>
               <Stat label="Books">{s.bookCount.toLocaleString()}</Stat>
               <Stat label="Downloaded">{s.downloadedCount.toLocaleString()}</Stat>
               <Stat label="Missing">{s.missingCount.toLocaleString()}</Stat>
               <Stat label="In queue">{s.queueCount.toLocaleString()}</Stat>
               <Stat label="Library size">{formatBytes(s.librarySizeBytes)}</Stat>
-              <Stat label="Started">
+            </dl>
+            <dl className="flex flex-wrap gap-x-8 gap-y-1.5 border-t border-line px-4 py-3 text-sm">
+              <Fact label="Version">
+                <span className="font-mono text-xs">{s.version}</span>
+              </Fact>
+              <Fact label="Started">
                 <span title={formatDateTime(s.startedAt)}>{formatRelative(s.startedAt)}</span>
-              </Stat>
-            </div>
-            <p className="mt-3 text-sm text-muted">
-              Data directory: <span className="font-mono text-xs text-fg">{s.dataDir}</span>
-            </p>
-          </>
+              </Fact>
+              <Fact label="Data directory">
+                <span className="font-mono text-xs">{s.dataDir}</span>
+              </Fact>
+            </dl>
+          </div>
         )}
       </QueryView>
     </section>

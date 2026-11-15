@@ -4,7 +4,7 @@ import { Button, IconButton } from '../../components/Button'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { Field, Input } from '../../components/Form'
 import { QueryView } from '../../components/QueryView'
-import { SettingsSection } from '../../components/SettingsSection'
+import { FormSection } from '../../components/FormLayout'
 import { useUsername } from '../../lib/auth'
 import { useChangePassword, useRegenerateApiKey } from '../../lib/mutations'
 import { useStatus } from '../../lib/queries'
@@ -20,7 +20,7 @@ function PasswordForm() {
   const mismatch = confirm !== '' && next !== confirm
 
   return (
-    <SettingsSection title="Change password" description={`Signed in as ${username}.`}>
+    <FormSection title="Password" description={`Signed in as ${username}.`}>
       <form
         className="max-w-sm space-y-4"
         onSubmit={(e) => {
@@ -77,7 +77,7 @@ function PasswordForm() {
           Change password
         </Button>
       </form>
-    </SettingsSection>
+    </FormSection>
   )
 }
 
@@ -88,13 +88,13 @@ function ApiKeySection() {
   const [confirming, setConfirming] = useState(false)
 
   return (
-    <SettingsSection
+    <FormSection
       title="API key"
       description="Send this as the X-Api-Key header to use the Chaptarr API from scripts and other tools."
     >
       <QueryView query={query}>
         {(status) => (
-          <div className="max-w-xl">
+          <div>
             <div className="flex gap-2">
               <Input
                 readOnly
@@ -145,15 +145,16 @@ function ApiKeySection() {
         onCancel={() => setConfirming(false)}
         onConfirm={() => regenerate.mutate(undefined, { onSettled: () => setConfirming(false) })}
       />
-    </SettingsSection>
+    </FormSection>
   )
 }
 
 export function AccountSettings() {
   return (
-    <>
+    // One parent, so the first section drops its top rule like the other settings pages.
+    <div>
       <PasswordForm />
       <ApiKeySection />
-    </>
+    </div>
   )
 }

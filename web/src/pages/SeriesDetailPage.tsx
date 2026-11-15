@@ -35,13 +35,18 @@ function SeriesBody({ series }: { series: SeriesDetail }) {
         title={series.name}
         description={`${plural(series.bookCount, 'book')} · ${series.downloadedCount} downloaded`}
       />
-      <div className="mb-6 flex items-center gap-4 rounded-card border border-line bg-surface p-4">
+      <div className="mb-6 flex flex-wrap items-center gap-4 rounded-card border border-line bg-surface p-4">
         <Cover src={series.coverUrl} alt="" kind="series" className="size-16" />
         <div className="min-w-0 flex-1 text-sm">
-          <div className="text-muted">
-            by <span className="text-fg">{series.authorName || 'Unknown author'}</span>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 sm:max-w-xs">
+            <span className="text-muted">
+              by <span className="text-fg">{series.authorName || 'Unknown author'}</span>
+            </span>
+            <span className="text-xs text-muted tabular-nums">
+              {series.downloadedCount} of {series.bookCount}
+            </span>
           </div>
-          <ProgressBar
+          <ProgressBar label="Books downloaded"
             className="mt-2 max-w-xs"
             value={series.bookCount > 0 ? series.downloadedCount / series.bookCount : 0}
             tone={series.bookCount > 0 && series.downloadedCount === series.bookCount ? 'ok' : 'accent'}

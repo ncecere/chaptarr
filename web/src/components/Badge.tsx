@@ -51,7 +51,7 @@ export function Badge({
 }) {
   if (dot) {
     return (
-      <span title={title} className={cn('inline-flex items-center gap-1.5 whitespace-nowrap text-sm text-muted', className)}>
+      <span title={title} className={cn('inline-flex items-center gap-1.5 whitespace-nowrap text-muted', className)}>
         <span className={cn('size-1.5 shrink-0 rounded-full', dots[tone])} aria-hidden />
         {children}
       </span>

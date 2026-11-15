@@ -32,12 +32,12 @@ export function BookResultRow({ book }: { book: BookResult }) {
       <div className="flex gap-3 sm:gap-4">
         <Cover src={book.coverUrl} alt={`Cover of ${book.title}`} className="size-20 sm:size-24" />
         <div className="min-w-0 flex-1">
-          <h3 className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium leading-snug">
+          <h2 className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium leading-snug">
             {book.title}
             <Badge tone={book.source === 'audible' ? 'neutral' : 'info'} title="Metadata source">
               {metadataSourceMeta[book.source].label}
             </Badge>
-          </h3>
+          </h2>
           {book.subtitle && <div className="text-xs text-muted">{book.subtitle}</div>}
           <div className="mt-1 text-sm text-muted">
             {book.authors.length > 0 ? book.authors.map((a) => a.name).join(', ') : 'Unknown author'}

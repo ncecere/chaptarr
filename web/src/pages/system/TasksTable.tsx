@@ -27,7 +27,44 @@ export function TasksTable() {
       <h2 className="mb-3 text-base font-semibold">Tasks</h2>
       <QueryView query={query}>
         {(tasks) => (
-          <div className="overflow-x-auto rounded-card border border-line bg-surface">
+          <div className="overflow-hidden rounded-card border border-line bg-surface">
+            <ul className="divide-y divide-line sm:hidden">
+              {tasks.map((t) => (
+                <li key={t.name} className="flex items-center gap-3 px-3 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                      {t.label}
+                      {t.running && (
+                        <Badge tone="accent">
+                          <Spinner className="size-3" />
+                          Running
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted">
+                      {formatInterval(t.intervalSeconds)} · last {t.lastRunAt ? formatRelative(t.lastRunAt) : 'never'}
+                      {t.nextRunAt && ` · next ${formatRelative(t.nextRunAt)}`}
+                    </div>
+                    {t.lastError && <div className="mt-0.5 break-words text-xs text-bad">{t.lastError}</div>}
+                  </div>
+                <Button
+                  size="sm"
+                  icon={<Play className="size-3.5" />}
+                  disabled={t.running}
+                  loading={run.isPending && run.variables.name === t.name}
+                  onClick={() =>
+                    run.mutate(
+                      { name: t.name, label: t.label },
+                      { onSuccess: () => (pollUntil.current = Date.now() + 8_000) },
+                    )
+                  }
+                >
+                  Run
+                </Button>
+                </li>
+              ))}
+            </ul>
+            <div className="hidden overflow-x-auto sm:block">
             <table className="w-full min-w-[44rem] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-line bg-surface-2/50">
@@ -36,7 +73,7 @@ export function TasksTable() {
                   <th className={th}>Last run</th>
                   <th className={th}>Duration</th>
                   <th className={th}>Next run</th>
-                  <th className="w-28" />
+                  <th className="w-28"><span className="sr-only">Run</span></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
@@ -84,6 +121,7 @@ export function TasksTable() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </QueryView>

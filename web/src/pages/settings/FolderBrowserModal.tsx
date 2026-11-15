@@ -31,7 +31,7 @@ export function FolderBrowserModal({ onClose }: { onClose: () => void }) {
           <span className="mr-auto min-w-0 truncate text-xs text-muted">
             {listing ? listing.path : ''}
           </span>
-          <Button onClick={onClose} disabled={add.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={add.isPending}>
             Cancel
           </Button>
           <Button

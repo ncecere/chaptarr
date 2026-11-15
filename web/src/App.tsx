@@ -49,6 +49,8 @@ export default function App() {
                 <Route path="account" element={<AccountSettings />} />
               </Route>
               <Route path="system" element={<SystemPage />} />
+              {/* Signing in happens in place at any URL; a bookmarked /login should still land somewhere. */}
+              <Route path="login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>

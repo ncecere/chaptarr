@@ -48,7 +48,7 @@ export function SetupBanner() {
                 {s.done ? (
                   <span className="text-muted line-through">{s.label}</span>
                 ) : (
-                  <Link to={s.to} className="text-accent underline-offset-2 hover:underline">
+                  <Link to={s.to} className="link">
                     {s.label}
                   </Link>
                 )}

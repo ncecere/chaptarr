@@ -45,7 +45,7 @@ function QueueRow({ item, onRemove }: { item: QueueItem; onRemove: () => void })
           {item.sizeBytes > 0 && <span>{formatBytes(item.sizeBytes)}</span>}
         </div>
         <div className="mt-2.5 flex items-center gap-3">
-          <ProgressBar value={progress} tone={tone} className="max-w-md flex-1" />
+          <ProgressBar label="Download progress" value={progress} tone={tone} className="max-w-md flex-1" />
           <span className="w-9 text-right text-xs text-muted tabular-nums">{formatPercent(progress)}</span>
           {item.status === 'downloading' && (
             <span className="text-xs text-muted tabular-nums" title="Estimated time remaining">

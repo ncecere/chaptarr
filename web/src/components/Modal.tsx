@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useEffect, useRef, type KeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useId, useRef, type KeyboardEvent, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { cn } from '../lib/cn'
 import { IconButton } from './Button'
@@ -27,6 +27,7 @@ const FOCUSABLE =
 
 export function Modal({ open, onClose, title, children, footer, size = 'md', busy }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const titleId = useId()
   const onCloseRef = useRef(onClose)
   const busyRef = useRef(busy)
   useEffect(() => {
@@ -81,6 +82,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', bus
         ref={panelRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={trapTab}
         className={cn(
@@ -89,7 +91,9 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', bus
         )}
       >
         <div className="flex items-center justify-between gap-4 border-b border-line py-3 pr-3 pl-5">
-          <h2 className="min-w-0 truncate text-base font-semibold">{title}</h2>
+          <h2 id={titleId} className="min-w-0 truncate text-base font-semibold">
+            {title}
+          </h2>
           <IconButton label="Close" size="sm" onClick={onClose} disabled={busy}>
             <X className="size-4" />
           </IconButton>

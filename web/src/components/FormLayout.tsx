@@ -26,7 +26,10 @@ export function FormSection({
   )
 }
 
-/** Save and discard, pinned to the bottom of the viewport while the form has unsaved changes. */
+/**
+ * Save and discard. The bar appears, pinned to the bottom of the viewport,
+ * once the form differs from what is saved, and leaves when it no longer does.
+ */
 export function FormActions({
   dirty,
   saving,
@@ -36,15 +39,20 @@ export function FormActions({
   saving: boolean
   onDiscard: () => void
 }) {
+  if (!dirty && !saving) return null
   return (
-    <div className="sticky bottom-0 z-10 -mx-4 mt-2 flex items-center gap-2 border-t border-line bg-canvas/85 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10">
-      <Button type="submit" variant="primary" loading={saving} disabled={!dirty}>
-        Save changes
-      </Button>
-      <Button variant="ghost" disabled={!dirty || saving} onClick={onDiscard}>
+    <div
+      role="region"
+      aria-label="Unsaved changes"
+      className="sticky bottom-0 z-10 -mx-4 mt-2 flex items-center gap-2 border-t border-line bg-canvas/85 px-4 py-3 backdrop-blur-md animate-toast-in sm:-mx-6 sm:px-6 lg:-mx-10 lg:px-10"
+    >
+      <span className="mr-auto text-sm text-muted">You have unsaved changes</span>
+      <Button variant="ghost" disabled={saving} onClick={onDiscard}>
         Discard
       </Button>
-      {dirty && !saving && <span className="ml-1 text-xs text-muted">You have unsaved changes</span>}
+      <Button type="submit" variant="primary" loading={saving}>
+        Save changes
+      </Button>
     </div>
   )
 }

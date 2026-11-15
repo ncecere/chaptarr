@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Status in tables is a coloured dot and a label; delete actions are quiet until hovered; the accent colour is kept for the main action of a view.
 - Selects and checkboxes are styled to match the other controls, and every control shares one focus ring.
 - Animations are turned off when the operating system asks for reduced motion.
+- **Phones:** book lists, history, tasks and search results stack into rows instead of scrolling sideways, and queue actions sit below each item.
+- **System page:** library numbers are one panel, and the log viewer colours each level.
+- **Accessibility:** dialogs and progress bars are named for screen readers, links inside text are underlined as well as coloured, and headings are in order. An automated audit (axe, WCAG 2.1 AA) reports no violations on any screen in either theme.
+- The save bar on settings pages appears only while there are unsaved changes.
 
 ## [0.4.0] - 2026-11-15
 

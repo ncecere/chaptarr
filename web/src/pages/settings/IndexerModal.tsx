@@ -48,7 +48,7 @@ export function IndexerModal({ indexer, onClose }: { indexer?: Indexer; onClose:
           >
             Test
           </Button>
-          <Button onClick={onClose} disabled={save.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={save.isPending}>
             Cancel
           </Button>
           <Button type="submit" form={formId} variant="primary" loading={save.isPending}>

@@ -20,7 +20,7 @@ function AuthorProgress({ author }: { author: Author }) {
   const frac = author.bookCount > 0 ? author.downloadedCount / author.bookCount : 0
   return (
     <div className="w-full">
-      <ProgressBar value={frac} tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'} />
+      <ProgressBar label="Books downloaded" value={frac} tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'} />
       <div className="mt-1 flex justify-between text-xs text-muted">
         <span className="tabular-nums">
           {author.downloadedCount} / {author.bookCount} books

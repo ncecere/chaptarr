@@ -64,7 +64,7 @@ export function RootFoldersSettings() {
                     </div>
                     {f.accessible && f.totalBytes > 0 && (
                       <div className="mt-2 max-w-sm">
-                        <ProgressBar value={used} tone={used > 0.9 ? 'warn' : 'accent'} />
+                        <ProgressBar label="Disk space used" value={used} tone={used > 0.9 ? 'warn' : 'accent'} />
                         <div className="mt-1 text-xs text-muted">
                           {formatBytes(f.freeBytes)} free of {formatBytes(f.totalBytes)}
                         </div>

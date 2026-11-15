@@ -14,7 +14,7 @@
  *   line / -strong    hairlines; control borders
  *   fg / muted / faint  primary, secondary and tertiary text (all pass WCAG AA on surface)
  *   accent            the one brand colour: primary actions, selection, focus
- *   ok / warn / bad / info  status
+ *   ok / warn / bad / info  status (each passes AA as text on a 14% tint of itself)
  *
  * Radius roles
  *   chip 4px (badges, inner segments)   control 6px (buttons, inputs, covers)
@@ -103,13 +103,13 @@
   --fg: #16171b;
   --muted: #565b69;
   --faint: #666b79;
-  --accent: #4f5bd5;
-  --accent-hover: #4350c4;
+  --accent: #4650c8;
+  --accent-hover: #3b45b6;
   --accent-fg: #ffffff;
-  --ok: #0b7a4b;
-  --warn: #99600a;
-  --bad: #c62f47;
-  --info: #1d68b8;
+  --ok: #08683f;
+  --warn: #855305;
+  --bad: #b0233a;
+  --info: #185ca6;
   --on-status: #ffffff;
   --control-bg: #ffffff;
   --scrim: rgb(22 23 27 / 0.4);
@@ -332,6 +332,23 @@
   .checkbox:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+  }
+
+  /*
+   * A link inside running text. Colour alone does not separate it from the
+   * text around it (WCAG 1.4.1), so it is underlined as well.
+   */
+  .link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.12s;
+  }
+
+  .link:hover {
+    text-decoration-color: var(--accent);
   }
 
   /* Table header cells: small caps labels. */

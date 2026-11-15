@@ -112,7 +112,7 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
         <Cover src={author.imageUrl} alt={author.name} kind="author" className="size-28 sm:size-36" />
         <div className="min-w-0 flex-1 space-y-4">
           <div className="max-w-md">
-            <ProgressBar
+            <ProgressBar label="Books downloaded"
               value={author.bookCount > 0 ? author.downloadedCount / author.bookCount : 0}
               tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'}
             />

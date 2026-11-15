@@ -1,6 +1,5 @@
 import { RefreshCw } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Badge } from '../../components/Badge'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { Select } from '../../components/Form'
@@ -9,12 +8,11 @@ import type { LogEntry } from '../../lib/api'
 import { cn } from '../../lib/cn'
 import { formatDate, formatTime } from '../../lib/format'
 import { useLogs } from '../../lib/queries'
-import type { Tone } from '../../lib/status'
 
 type Level = LogEntry['level']
 
 const RANK: Record<Level, number> = { debug: 0, info: 1, warn: 2, error: 3 }
-const TONE: Record<Level, Tone> = { debug: 'neutral', info: 'info', warn: 'warn', error: 'bad' }
+const COLOR: Record<Level, string> = { debug: 'text-faint', info: 'text-info', warn: 'text-warn', error: 'text-bad' }
 const LIMIT = 300
 
 export function LogViewer() {
@@ -43,7 +41,6 @@ export function LogViewer() {
           <option value="error">Errors only</option>
         </Select>
         <Button
-          size="sm"
           icon={<RefreshCw className={cn('size-3.5', query.isFetching && 'animate-spin')} />}
           onClick={() => void query.refetch()}
           disabled={query.isFetching}
@@ -63,18 +60,17 @@ export function LogViewer() {
       >
         {(entries) => (
           <div className="max-h-[32rem] overflow-auto rounded-card border border-line bg-surface">
-            <table className="w-full border-collapse font-mono text-xs">
-              <tbody className="divide-y divide-line">
+            <table className="w-full border-collapse font-mono text-xs leading-relaxed">
+              <tbody>
                 {entries.map((e, i) => (
-                  <tr key={`${e.time}-${i}`} className={cn('align-top', e.level === 'error' && 'bg-bad/5')}>
-                    <td className="px-3 py-1.5 whitespace-nowrap text-faint" title={formatDate(e.time)}>
+                  <tr
+                    key={`${e.time}-${i}`}
+                    className={cn('align-top transition-colors hover:bg-surface-2/60', e.level === 'error' && 'bg-bad/5')}
+                  >
+                    <td className="w-px py-1.5 pr-3 pl-3 whitespace-nowrap text-faint tabular-nums" title={formatDate(e.time)}>
                       {formatTime(e.time)}
                     </td>
-                    <td className="px-1 py-1.5">
-                      <Badge tone={TONE[e.level]} className="font-sans uppercase">
-                        {e.level}
-                      </Badge>
-                    </td>
+                    <td className={cn('w-12 py-1.5 font-medium uppercase', COLOR[e.level])}>{e.level}</td>
                     <td className="px-3 py-1.5 break-words whitespace-pre-wrap">{e.message}</td>
                   </tr>
                 ))}

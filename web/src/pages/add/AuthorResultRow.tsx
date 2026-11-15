@@ -26,7 +26,7 @@ export function AuthorResultRow({ author }: { author: AuthorResult }) {
       <div className="flex gap-3 sm:gap-4">
         <Cover src={author.imageUrl} alt={author.name} kind="author" className="size-16 sm:size-20" />
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium leading-snug">{author.name}</h3>
+          <h2 className="font-medium leading-snug">{author.name}</h2>
           {description && <p className="mt-1 line-clamp-2 text-xs text-muted">{description}</p>}
         </div>
         <div className="shrink-0">

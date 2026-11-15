@@ -1,3 +1,4 @@
+import { cn } from '../lib/cn'
 import { FolderInput, Search, Trash2, Zap } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -88,7 +89,7 @@ function BookBody({ book }: { book: BookDetail }) {
                 <span key={`${name}-${i}`}>
                   {i > 0 && ', '}
                   {i === 0 ? (
-                    <Link to={`/authors/${book.authorId}`} className="text-accent hover:underline">
+                    <Link to={`/authors/${book.authorId}`} className="link">
                       {name}
                     </Link>
                   ) : (
@@ -100,7 +101,7 @@ function BookBody({ book }: { book: BookDetail }) {
             {book.narrators.length > 0 && <Meta label="Narrated by">{book.narrators.join(', ')}</Meta>}
             {book.series && (
               <Meta label="Series">
-                <Link to={`/series/${book.series.id}`} className="text-accent hover:underline">
+                <Link to={`/series/${book.series.id}`} className="link">
                   {book.series.name}
                 </Link>
                 {book.series.position && <span className="text-muted"> · Book {book.series.position}</span>}
@@ -136,11 +137,11 @@ function BookBody({ book }: { book: BookDetail }) {
           </p>
         ) : (
           <div className="overflow-x-auto rounded-card border border-line bg-surface">
-            <table className="w-full min-w-[28rem] border-collapse text-sm">
+            <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-line bg-surface-2/50">
                   <th className={th}>Path</th>
-                  <th className={th}>Format</th>
+                  <th className={cn(th, 'hidden sm:table-cell')}>Format</th>
                   <th className={th}>Size</th>
                 </tr>
               </thead>
@@ -148,7 +149,7 @@ function BookBody({ book }: { book: BookDetail }) {
                 {book.files.map((f) => (
                   <tr key={f.id}>
                     <td className="px-3 py-2 font-mono text-xs break-all">{f.path}</td>
-                    <td className="px-3 py-2 whitespace-nowrap uppercase text-muted">{f.format || '—'}</td>
+                    <td className="hidden px-3 py-2 whitespace-nowrap uppercase text-muted sm:table-cell">{f.format || '—'}</td>
                     <td className="px-3 py-2 whitespace-nowrap text-muted tabular-nums">{formatBytes(f.sizeBytes)}</td>
                   </tr>
                 ))}
