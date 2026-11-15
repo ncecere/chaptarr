@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-15
+
+Adding whole series and whole author catalogues, and status badges that can be read on covers.
+
 ### Added
 
 - **Add missing books from a series.** The series page lists the books the catalogue has for the series that are not in your library, one edition per position, and adds the ones you tick.
@@ -38,5 +42,6 @@ The first release: follow authors, find their audiobooks on your indexers, downl
 - **API.** Everything the UI does is available under `/api/v1` with an `X-Api-Key` header.
 - **Container image** `ghcr.io/ncecere/chaptarr` for linux/amd64 and linux/arm64, signed with cosign, with an SBOM and build provenance; and binaries for Linux, macOS and Windows.
 
-[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ncecere/chaptarr/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ncecere/chaptarr/releases/tag/v0.1.0
