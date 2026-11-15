@@ -24,8 +24,12 @@ import (
 	"github.com/ncecere/chaptarr/web"
 )
 
-// version is set at build time with -ldflags "-X main.version=...".
-var version = "dev"
+// version and commit are set at build time with
+// -ldflags "-X main.version=... -X main.commit=...".
+var (
+	version = "dev"
+	commit  = "unknown"
+)
 
 func envOr(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
@@ -54,8 +58,14 @@ func run() error {
 	debug := flag.Bool("debug", os.Getenv("CHAPTARR_DEBUG") != "", "log debug messages (env CHAPTARR_DEBUG)")
 	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
-	if *showVersion {
-		fmt.Println(version)
+	// `chaptarr version` prints "chaptarr v1.2.3 (abc1234)"; the release
+	// pipeline checks a tagged image against it.
+	if *showVersion || flag.Arg(0) == "version" {
+		short := commit
+		if len(short) > 7 {
+			short = short[:7]
+		}
+		fmt.Printf("chaptarr %s (%s)\n", version, short)
 		return nil
 	}
 

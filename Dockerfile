@@ -15,13 +15,14 @@ RUN go mod download
 COPY . .
 COPY --from=web /src/web/dist ./web/dist
 ARG VERSION=dev
+ARG COMMIT=unknown
 ARG TARGETOS
 ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-	go build -ldflags "-s -w -X main.version=${VERSION}" -o /chaptarr ./cmd/chaptarr
+	go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" -o /chaptarr ./cmd/chaptarr
 
 FROM alpine:3.22
-RUN apk add --no-cache ca-certificates tzdata && adduser -D -u 1000 chaptarr \
+RUN apk upgrade --no-cache && apk add --no-cache ca-certificates tzdata && adduser -D -u 1000 chaptarr \
 	&& mkdir -p /config && chown chaptarr /config
 COPY --from=build /chaptarr /usr/local/bin/chaptarr
 USER chaptarr

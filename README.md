@@ -48,8 +48,14 @@ admin account. After that:
 
 ### Docker
 
-Every push to `main` publishes a multi-arch image (amd64, arm64) to
-`ghcr.io/ncecere/chaptarr`.
+Images are published to `ghcr.io/ncecere/chaptarr` for amd64 and arm64:
+
+| Tag               | What it is                                       |
+| ----------------- | ------------------------------------------------ |
+| `latest`          | The newest release                               |
+| `v0.1.0`, `v0.1`  | One release; the newest patch of a minor version |
+| `edge`            | The current `main` branch, for testing           |
+| `sha-<commit>`    | One commit of `main`                             |
 
 ```sh
 docker compose up -d            # pull the published image
@@ -58,6 +64,9 @@ docker compose up -d --build    # or build from source
 
 While the repository is private, so is the image: run
 `docker login ghcr.io` with a token that has `read:packages` first.
+
+Binaries for Linux, macOS and Windows are attached to each
+[release](https://github.com/ncecere/chaptarr/releases).
 
 See `docker-compose.yml`. Chaptarr and the download client must see finished
 downloads at the **same path**; mount one parent directory containing both
@@ -109,6 +118,35 @@ internal/download   qBittorrent and SABnzbd
 internal/library    folder naming, import, disk scan
 web                 React + Vite UI
 ```
+
+## Releasing
+
+Versions follow [Semantic Versioning](https://semver.org): a patch release
+(`v0.1.1`) only fixes bugs, a minor release (`v0.2.0`) adds features, and a
+major release changes something you have to act on. Before 1.0, a minor
+release may also include breaking changes. Every change is recorded in
+[`CHANGELOG.md`](CHANGELOG.md).
+
+To cut a release from `main`:
+
+1. In `CHANGELOG.md`, rename `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`,
+   add a new empty `## [Unreleased]` above it and update the links at the
+   bottom. Commit and push.
+2. Check, then tag:
+
+   ```sh
+   make release-check TAG=vX.Y.Z
+   git tag -a vX.Y.Z -m "Chaptarr vX.Y.Z"
+   git push origin vX.Y.Z
+   ```
+
+The tag starts the pipeline in `.github/workflows/ci.yml`. It refuses a tag
+that is not a semantic version, is not on `main` or has no changelog section;
+runs the tests; builds the image, starts it, scans it for known
+vulnerabilities and signs it; and creates the GitHub Release with the
+changelog section as its notes, plus the binaries, the image's SBOMs and
+checksums. A tag with a hyphen (`vX.Y.Z-rc.1`) makes a pre-release, which
+does not move `latest` or `vX.Y`.
 
 ## Known limitations
 

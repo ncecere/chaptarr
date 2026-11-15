@@ -1,0 +1,105 @@
+# Tests every push to main, every v* tag and every pull request. After the
+# tests pass:
+#   main        -> image.yml publishes ghcr.io/ncecere/chaptarr:edge and :sha-<short>
+#   vX.Y.Z tag  -> image.yml publishes :vX.Y.Z, :vX.Y and :latest, then the
+#                  release job creates the GitHub Release (README, "Releasing")
+#
+# Every action is pinned by commit SHA; the comment gives the version.
+name: ci
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # A release tag must be a semantic version, belong to main, and have its
+  # notes written, before anything is built from it.
+  tag:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Check the tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: deploy/release/check-tag.sh
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # pnpm at the version pinned by packageManager in web/package.json.
+      - run: corepack enable
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      # The Go build embeds web/dist, so the UI is built first.
+      - run: make web
+      - run: make test
+      - name: Check formatting
+        run: test -z "$(gofmt -l cmd internal web/embed.go)"
+
+  image:
+    needs: [tag, test]
+    # `tag` is skipped on branches; it must not have failed.
+    if: >-
+      always() && needs.test.result == 'success' &&
+      (needs.tag.result == 'success' || needs.tag.result == 'skipped') &&
+      github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: ./.github/workflows/image.yml
+
+  # The GitHub Release for a v* tag: notes from CHANGELOG.md, the image
+  # digest and verification command, and as assets the binaries, the image's
+  # SBOMs and checksums.txt. Tags with a hyphen (v1.2.0-rc.1) are pre-releases.
+  release:
+    needs: [image]
+    if: always() && needs.image.result == 'success' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read # the image's SBOM attestations
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - run: corepack enable
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build the binaries
+        env:
+          TAG: ${{ github.ref_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          make web
+          deploy/release/build-binaries.sh dist
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          DIGEST: ${{ needs.image.outputs.digest }}
+        run: deploy/release/github-release.sh dist
