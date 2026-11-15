@@ -73,7 +73,7 @@ export function SeriesPage() {
                     {s.name}
                   </div>
                   <div className="truncate text-xs text-muted">{s.authorName}</div>
-                  <ProgressBar
+                  <ProgressBar label="Books downloaded"
                     className="mt-1.5"
                     value={s.bookCount > 0 ? s.downloadedCount / s.bookCount : 0}
                     tone={s.bookCount > 0 && s.downloadedCount === s.bookCount ? 'ok' : 'accent'}

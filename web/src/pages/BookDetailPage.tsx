@@ -1,3 +1,4 @@
+import { cn } from '../lib/cn'
 import { FolderInput, Search, Trash2, Zap } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -29,7 +30,7 @@ function Meta({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
-const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-faint'
+const th = 'th'
 
 function BookBody({ book }: { book: BookDetail }) {
   useDocumentTitle(book.title)
@@ -50,7 +51,7 @@ function BookBody({ book }: { book: BookDetail }) {
 
       <div className="grid gap-6 md:grid-cols-[15rem_1fr] lg:grid-cols-[18rem_1fr]">
         <div className="mx-auto w-full max-w-72 md:mx-0">
-          <Cover src={book.coverUrl} alt={`Cover of ${book.title}`} className="w-full shadow-xl" />
+          <Cover src={book.coverUrl} alt={`Cover of ${book.title}`} className="w-full rounded-card shadow-overlay" />
         </div>
 
         <div className="min-w-0 space-y-6">
@@ -82,13 +83,13 @@ function BookBody({ book }: { book: BookDetail }) {
             </Button>
           </div>
 
-          <dl className="divide-y divide-line rounded-xl border border-line bg-surface px-4 py-1.5">
+          <dl className="divide-y divide-line rounded-card border border-line bg-surface px-4 py-1.5">
             <Meta label="Author">
               {authors.map((name, i) => (
                 <span key={`${name}-${i}`}>
                   {i > 0 && ', '}
                   {i === 0 ? (
-                    <Link to={`/authors/${book.authorId}`} className="text-accent hover:underline">
+                    <Link to={`/authors/${book.authorId}`} className="link">
                       {name}
                     </Link>
                   ) : (
@@ -100,7 +101,7 @@ function BookBody({ book }: { book: BookDetail }) {
             {book.narrators.length > 0 && <Meta label="Narrated by">{book.narrators.join(', ')}</Meta>}
             {book.series && (
               <Meta label="Series">
-                <Link to={`/series/${book.series.id}`} className="text-accent hover:underline">
+                <Link to={`/series/${book.series.id}`} className="link">
                   {book.series.name}
                 </Link>
                 {book.series.position && <span className="text-muted"> · Book {book.series.position}</span>}
@@ -131,16 +132,16 @@ function BookBody({ book }: { book: BookDetail }) {
       <section className="mt-10">
         <h2 className="mb-2 text-base font-semibold">Files</h2>
         {book.files.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">
+          <p className="rounded-card border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">
             No files on disk yet.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface">
-            <table className="w-full min-w-[28rem] border-collapse text-sm">
+          <div className="overflow-x-auto rounded-card border border-line bg-surface">
+            <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-line">
+                <tr className="border-b border-line bg-surface-2/50">
                   <th className={th}>Path</th>
-                  <th className={th}>Format</th>
+                  <th className={cn(th, 'hidden sm:table-cell')}>Format</th>
                   <th className={th}>Size</th>
                 </tr>
               </thead>
@@ -148,7 +149,7 @@ function BookBody({ book }: { book: BookDetail }) {
                 {book.files.map((f) => (
                   <tr key={f.id}>
                     <td className="px-3 py-2 font-mono text-xs break-all">{f.path}</td>
-                    <td className="px-3 py-2 whitespace-nowrap uppercase text-muted">{f.format || '—'}</td>
+                    <td className="hidden px-3 py-2 whitespace-nowrap uppercase text-muted sm:table-cell">{f.format || '—'}</td>
                     <td className="px-3 py-2 whitespace-nowrap text-muted tabular-nums">{formatBytes(f.sizeBytes)}</td>
                   </tr>
                 ))}
@@ -161,7 +162,7 @@ function BookBody({ book }: { book: BookDetail }) {
       <section className="mt-8">
         <h2 className="mb-2 text-base font-semibold">History</h2>
         {book.history.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">
+          <p className="rounded-card border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">
             Nothing has happened to this book yet.
           </p>
         ) : (

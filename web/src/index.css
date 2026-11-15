@@ -1,30 +1,120 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/geist-mono/wght.css";
 
-/* One dark theme, one accent. Tokens are used as bg-surface, text-muted, border-line, etc. */
-@theme {
-  --color-canvas: #0c0e13;
-  --color-surface: #13161d;
-  --color-surface-2: #1a1e27;
-  --color-surface-3: #232834;
-  --color-line: #252a35;
-  --color-line-strong: #343b4a;
-  --color-fg: #e6e8ee;
-  --color-muted: #9aa1b0;
-  --color-faint: #687083;
-  --color-accent: #7c8cff;
-  --color-accent-hover: #96a3ff;
-  --color-accent-fg: #0c0e13;
-  --color-ok: #3ecf8e;
-  --color-warn: #f5b942;
-  --color-bad: #f2677a;
-  --color-info: #5aa9f5;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+/*
+ * Design tokens. Components never name a raw colour, radius or shadow: they
+ * use the utilities these generate (bg-surface, text-muted, rounded-card,
+ * shadow-overlay, ...), so the two themes below are the whole palette.
+ *
+ * Colour roles
+ *   canvas            the page
+ *   surface           cards, tables, the sidebar
+ *   surface-2 / -3    controls and hover; pressed and selected
+ *   line / -strong    hairlines; control borders
+ *   fg / muted / faint  primary, secondary and tertiary text (all pass WCAG AA on surface)
+ *   accent            the one brand colour: primary actions, selection, focus
+ *   ok / warn / bad / info  status (each passes AA as text on a 14% tint of itself)
+ *
+ * Radius roles
+ *   chip 4px (badges, inner segments)   control 6px (buttons, inputs, covers)
+ *   card 10px (cards, tables, panels)   dialog 14px (modals)   full (avatars, switches)
+ */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-info: var(--info);
+  /* Text on a solid status colour (cover badges, destructive buttons). */
+  --color-on-status: var(--on-status);
+  --color-scrim: var(--scrim);
+
+  --radius-chip: 4px;
+  --radius-control: 6px;
+  --radius-card: 10px;
+  --radius-dialog: 14px;
+
+  --shadow-raised: var(--shadow-raised);
+  --shadow-overlay: var(--shadow-overlay);
+
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
     Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --animate-toast-in: toast-in 0.18s ease-out;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Type scale: 11 caps labels · 12 meta · 14 body · 15 section · 20 page title. */
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.375rem;
+
+  --animate-toast-in: toast-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-fade-in: fade-in 0.15s ease-out;
-  --animate-pop-in: pop-in 0.16s ease-out;
+  --animate-pop-in: pop-in 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-indeterminate: indeterminate 1.4s ease-in-out infinite;
+}
+
+/* Dark is the default; it also applies before the theme script has run. */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #0d0e11;
+  --surface: #131418;
+  --surface-2: #1a1c21;
+  --surface-3: #24262d;
+  --line: #212329;
+  --line-strong: #31343d;
+  --fg: #ececf0;
+  --muted: #a1a5b0;
+  --faint: #7f8491;
+  --accent: #818cf8;
+  --accent-hover: #99a2fa;
+  --accent-fg: #0d0e11;
+  --ok: #45c98d;
+  --warn: #e9b44c;
+  --bad: #f07082;
+  --info: #62a8ee;
+  --on-status: #0d0e11;
+  --control-bg: #1a1c21;
+  --scrim: rgb(0 0 0 / 0.62);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-overlay: 0 0 0 1px rgb(255 255 255 / 0.04), 0 12px 32px -8px rgb(0 0 0 / 0.6), 0 4px 12px -4px rgb(0 0 0 / 0.5);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --canvas: #f6f6f8;
+  --surface: #ffffff;
+  --surface-2: #f1f2f5;
+  --surface-3: #e6e7ec;
+  --line: #e6e7ec;
+  --line-strong: #d0d3db;
+  --fg: #16171b;
+  --muted: #565b69;
+  --faint: #666b79;
+  --accent: #4650c8;
+  --accent-hover: #3b45b6;
+  --accent-fg: #ffffff;
+  --ok: #08683f;
+  --warn: #855305;
+  --bad: #b0233a;
+  --info: #185ca6;
+  --on-status: #ffffff;
+  --control-bg: #ffffff;
+  --scrim: rgb(22 23 27 / 0.4);
+  --shadow-raised: 0 1px 2px rgb(22 23 27 / 0.06);
+  --shadow-overlay: 0 0 0 1px rgb(22 23 27 / 0.05), 0 16px 40px -12px rgb(22 23 27 / 0.22), 0 4px 12px -4px rgb(22 23 27 / 0.1);
 }
 
 @keyframes toast-in {
@@ -50,7 +140,7 @@
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(6px);
+    transform: scale(0.98) translateY(4px);
   }
   to {
     opacity: 1;
@@ -69,18 +159,29 @@
 
 @layer base {
   html {
-    background-color: var(--color-canvas);
-    color-scheme: dark;
+    background-color: var(--canvas);
   }
 
   body {
     margin: 0;
-    background-color: var(--color-canvas);
-    color: var(--color-fg);
+    background-color: var(--canvas);
+    color: var(--fg);
     font-family: var(--font-sans);
     font-size: 14px;
     line-height: 1.5;
+    letter-spacing: -0.006em;
+    /* Inter: single-storey a off, open digits, slashed zero off; tabular figures are opted into per element. */
+    font-feature-settings: "cv11", "ss03", "calt";
+    font-optical-sizing: auto;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.015em;
   }
 
   a {
@@ -89,21 +190,177 @@
 
   button:not(:disabled),
   [role="button"],
-  summary {
+  summary,
+  label:has(input[type="checkbox"]:not(:disabled)) {
     cursor: pointer;
   }
 
+  /* One focus indicator everywhere: a 2px accent ring, set off from the element. */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
   ::selection {
-    background: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    background: color-mix(in srgb, var(--accent) 32%, transparent);
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-line-strong) transparent;
+    scrollbar-color: var(--line-strong) transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Shared control styles that are awkward as utility strings: the native
+ * select and checkbox are restyled so they match the rest of the controls in
+ * both themes while staying real, keyboard-operable form elements.
+ */
+@layer components {
+  .control {
+    height: 2rem;
+    border-radius: var(--radius-control);
+    border: 1px solid var(--line-strong);
+    background-color: var(--control-bg);
+    padding-inline: 0.625rem;
+    font-size: 0.875rem;
+    color: var(--fg);
+    box-shadow: var(--shadow-raised);
+    transition:
+      border-color 0.12s,
+      box-shadow 0.12s,
+      background-color 0.12s;
+  }
+
+  .control::placeholder {
+    color: var(--faint);
+  }
+
+  .control:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--faint) 70%, var(--line-strong));
+  }
+
+  .control:focus,
+  .control:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);
+  }
+
+  /* The browser's own clear button on search fields, toned down to match. */
+  .control[type="search"]::-webkit-search-cancel-button {
+    appearance: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-left: 0.375rem;
+    cursor: pointer;
+    background: var(--faint);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  .control:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  select.control {
+    appearance: none;
+    padding-right: 1.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237f8491' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 0.875rem;
+    text-overflow: ellipsis;
+  }
+
+  .checkbox {
+    appearance: none;
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    border-radius: var(--radius-chip);
+    border: 1px solid var(--line-strong);
+    background-color: var(--control-bg);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.75rem;
+    box-shadow: var(--shadow-raised);
+    transition:
+      background-color 0.12s,
+      border-color 0.12s;
+  }
+
+  .checkbox:hover:not(:disabled) {
+    border-color: var(--faint);
+  }
+
+  .checkbox:checked,
+  .checkbox:indeterminate {
+    border-color: var(--accent);
+    background-color: var(--accent);
+  }
+
+  /* The mark takes the colour of text on the accent, which differs per theme. */
+  .checkbox:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230d0e11' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-7'/%3E%3C/svg%3E");
+  }
+
+  .checkbox:indeterminate {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%230d0e11' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  }
+
+  :root[data-theme="light"] .checkbox:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-7'/%3E%3C/svg%3E");
+  }
+
+  :root[data-theme="light"] .checkbox:indeterminate {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  }
+
+  .checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  /*
+   * A link inside running text. Colour alone does not separate it from the
+   * text around it (WCAG 1.4.1), so it is underlined as well.
+   */
+  .link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.12s;
+  }
+
+  .link:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  /* Table header cells: small caps labels. */
+  .th {
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-size: var(--text-2xs);
+    line-height: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--faint);
   }
 }

@@ -93,7 +93,7 @@ export function DownloadClientsSettings() {
         }
       >
         {(clients) => (
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
             {clients.map((c) => (
               <ClientRow key={c.id} client={c} onEdit={() => setEditing(c)} onDelete={() => setDeleting(c)} />
             ))}

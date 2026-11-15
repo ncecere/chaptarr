@@ -1,4 +1,4 @@
-import { ListChecks, X } from 'lucide-react'
+import { Check, ListChecks, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { IconButton } from '../components/Button'
 import { useLocalStorage } from '../lib/hooks'
@@ -23,10 +23,10 @@ export function SetupBanner() {
   return (
     <section
       aria-label="Setup checklist"
-      className="mb-6 rounded-xl border border-accent/30 bg-accent/8 p-4"
+      className="mb-6 rounded-card border border-accent/25 bg-accent/8 p-4"
     >
       <div className="flex items-start gap-3">
-        <ListChecks className="mt-0.5 size-5 shrink-0 text-accent" />
+        <ListChecks className="mt-0.5 size-4 shrink-0 text-accent" />
         <div className="min-w-0 flex-1">
           <h2 className="text-sm font-semibold">Finish setting up Chaptarr</h2>
           <p className="mt-0.5 text-sm text-muted">
@@ -38,17 +38,17 @@ export function SetupBanner() {
                 <span
                   className={
                     s.done
-                      ? 'grid size-4 place-items-center rounded-full bg-ok text-[10px] font-bold text-accent-fg'
+                      ? 'grid size-4 place-items-center rounded-full bg-ok text-on-status'
                       : 'size-4 rounded-full border border-line-strong'
                   }
                   aria-hidden
                 >
-                  {s.done && '✓'}
+                  {s.done && <Check className="size-3" strokeWidth={3} />}
                 </span>
                 {s.done ? (
                   <span className="text-muted line-through">{s.label}</span>
                 ) : (
-                  <Link to={s.to} className="text-accent underline-offset-2 hover:underline">
+                  <Link to={s.to} className="link">
                     {s.label}
                   </Link>
                 )}

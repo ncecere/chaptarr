@@ -5,15 +5,17 @@ import { Badge } from './Badge'
 export function BookStatusBadge({
   status,
   solid,
+  dot,
   className,
 }: {
   status: BookStatus
   solid?: boolean
+  dot?: boolean
   className?: string
 }) {
   const m = bookStatusMeta[status]
   return (
-    <Badge tone={m.tone} solid={solid} className={className}>
+    <Badge tone={m.tone} solid={solid} dot={dot} className={className}>
       {m.label}
     </Badge>
   )

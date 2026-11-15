@@ -11,7 +11,7 @@ export function NotFoundPage() {
       title="Page not found"
       description="That page doesn't exist."
       action={
-        <Link to="/" className="text-accent hover:underline">
+        <Link to="/" className="link">
           Back to the library
         </Link>
       }

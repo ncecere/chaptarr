@@ -1,4 +1,4 @@
-import { ArrowUp, Folder, FolderInput } from 'lucide-react'
+import { ArrowUp, CircleAlert, Folder, FolderInput } from 'lucide-react'
 import { useState } from 'react'
 import type { Settings } from '../lib/api'
 import { formatBytes, plural } from '../lib/format'
@@ -63,7 +63,7 @@ export function ManualImportModal({
               value={chosenMode}
               onChange={(e) => setMode(e.target.value as Settings['importMode'])}
               disabled={run.isPending}
-              className="h-9 w-auto"
+              className="h-8 w-auto"
               aria-label="How to import"
             >
               {MODES.map((m) => (
@@ -130,7 +130,7 @@ export function ManualImportModal({
       <div className="grid gap-3 md:grid-cols-2">
         <div>
           <div className="mb-1 text-xs font-medium text-muted">Subfolders</div>
-          <div className="h-56 overflow-y-auto rounded-lg border border-line bg-surface-2/40">
+          <div className="h-56 overflow-y-auto rounded-control border border-line bg-surface-2/40">
             {!listing ? (
               <p className="px-4 py-8 text-center text-sm text-muted">
                 {browse.isError ? 'This is not a folder that can be browsed.' : 'Loading…'}
@@ -147,7 +147,7 @@ export function ManualImportModal({
                       onClick={() => go(d.path)}
                       className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-surface-3"
                     >
-                      <Folder className="size-4 shrink-0 text-accent" />
+                      <Folder className="size-4 shrink-0 text-faint" />
                       <span className="truncate">{d.name}</span>
                     </button>
                   </li>
@@ -163,14 +163,15 @@ export function ManualImportModal({
               ? `${plural(contents.files.length, 'audio file')} · ${formatBytes(contents.totalBytes)}`
               : 'Audio in this folder'}
           </div>
-          <div className="h-56 overflow-y-auto rounded-lg border border-line bg-surface-2/40">
+          <div className="h-56 overflow-y-auto rounded-control border border-line bg-surface-2/40">
             {inspect.isFetching ? (
               <p className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-muted">
                 <Spinner className="text-accent" /> Looking for audio…
               </p>
             ) : inspect.isError ? (
-              <p role="alert" className="px-4 py-8 text-center text-sm text-bad">
-                {errorMessage(inspect.error)}
+              <p role="alert" className="flex gap-2 px-3 py-3 text-xs leading-relaxed text-muted">
+                <CircleAlert className="mt-px size-3.5 shrink-0 text-bad" />
+                <span className="min-w-0 break-words">{errorMessage(inspect.error)}</span>
               </p>
             ) : !contents ? (
               <p className="px-4 py-8 text-center text-sm text-muted">Open a folder to see what it holds.</p>

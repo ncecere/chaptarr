@@ -1,9 +1,9 @@
 import { Check, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { Cover } from '../../components/Cover'
+import { LinkButton } from '../../components/LinkButton'
 import { Select } from '../../components/Form'
 import { Spinner } from '../../components/Spinner'
 import type { AuthorResult, MonitorMode } from '../../lib/api'
@@ -22,25 +22,20 @@ export function AuthorResultRow({ author }: { author: AuthorResult }) {
   const libraryId = addedId ?? author.libraryAuthorId
 
   return (
-    <li className="rounded-xl border border-line bg-surface p-3 sm:p-4">
+    <li className="rounded-card border border-line bg-surface p-3 sm:p-4">
       <div className="flex gap-3 sm:gap-4">
         <Cover src={author.imageUrl} alt={author.name} kind="author" className="size-16 sm:size-20" />
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium leading-snug">{author.name}</h3>
+          <h2 className="font-medium leading-snug">{author.name}</h2>
           {description && <p className="mt-1 line-clamp-2 text-xs text-muted">{description}</p>}
         </div>
         <div className="shrink-0">
           {libraryId !== null ? (
-            <Link
-              to={`/authors/${libraryId}`}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-ok/30 bg-ok/10 px-3 text-sm text-ok hover:bg-ok/20"
-            >
-              <Check className="size-4" />
+            <LinkButton to={`/authors/${libraryId}`} tone="ok" icon={<Check className="size-4" />}>
               In library
-            </Link>
+            </LinkButton>
           ) : (
             <Button
-              variant={optionsOpen ? 'secondary' : 'primary'}
               icon={<Plus className="size-4" />}
               onClick={() => setOptionsOpen(!optionsOpen)}
               disabled={add.isPending}
@@ -52,7 +47,7 @@ export function AuthorResultRow({ author }: { author: AuthorResult }) {
         </div>
       </div>
       {optionsOpen && libraryId === null && (
-        <div className="mt-3 space-y-3 rounded-lg bg-surface-2 px-4 py-3">
+        <div className="mt-3 space-y-3 rounded-control bg-surface-2 px-4 py-3">
           <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <label className="flex items-center gap-2 text-sm">
               Monitor

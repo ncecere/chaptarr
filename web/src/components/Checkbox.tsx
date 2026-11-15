@@ -25,7 +25,7 @@ export function Checkbox({
     if (ref.current) ref.current.indeterminate = !!indeterminate && !checked
   }, [indeterminate, checked])
   return (
-    <label className={cn('inline-flex items-center gap-2 text-sm', disabled && 'opacity-60', className)}>
+    <label className={cn('inline-flex items-center gap-2 text-sm', disabled && 'text-muted', className)}>
       <input
         ref={ref}
         type="checkbox"
@@ -33,7 +33,7 @@ export function Checkbox({
         disabled={disabled}
         aria-label={ariaLabel}
         onChange={(e) => onChange(e.target.checked)}
-        className="size-4 rounded accent-accent"
+        className="checkbox"
       />
       {label}
     </label>

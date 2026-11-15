@@ -90,7 +90,7 @@ export function IndexersSettings() {
         }
       >
         {(indexers) => (
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
             {indexers.map((i) => (
               <IndexerRow key={i.id} indexer={i} onEdit={() => setEditing(i)} onDelete={() => setDeleting(i)} />
             ))}

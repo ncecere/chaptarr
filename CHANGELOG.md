@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Light theme.** Chaptarr follows the operating system's light or dark setting, and the sidebar has a switch to force either.
+
+### Changed
+
+- **A visual overhaul.** The interface has one type scale (Inter and Geist Mono, now bundled instead of depending on the fonts installed on your device), one set of corner radii, and one colour palette per theme, with text that meets WCAG AA contrast in both.
+- The sidebar is grouped into Browse, Acquire and Manage.
+- Settings → General is grouped into named sections, and the save bar stays in view while there are unsaved changes.
+- Status in tables is a coloured dot and a label; delete actions are quiet until hovered; the accent colour is kept for the main action of a view.
+- Selects and checkboxes are styled to match the other controls, and every control shares one focus ring.
+- Animations are turned off when the operating system asks for reduced motion.
+- **Phones:** book lists, history, tasks and search results stack into rows instead of scrolling sideways, and queue actions sit below each item.
+- **System page:** library numbers are one panel, and the log viewer colours each level.
+- **Accessibility:** dialogs and progress bars are named for screen readers, links inside text are underlined as well as coloured, and headings are in order. An automated audit (axe, WCAG 2.1 AA) reports no violations on any screen in either theme.
+- The save bar on settings pages appears only while there are unsaved changes.
+
 ## [0.4.0] - 2026-11-15
 
 A way out for downloads that will not import, and a tidy download client.

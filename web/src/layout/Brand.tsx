@@ -6,13 +6,13 @@ export function Brand({ size = 'md' }: { size?: 'md' | 'lg' }) {
       <span
         className={
           size === 'lg'
-            ? 'grid size-11 place-items-center rounded-xl bg-accent text-accent-fg'
-            : 'grid size-8 place-items-center rounded-lg bg-accent text-accent-fg'
+            ? 'grid size-10 place-items-center rounded-card bg-accent text-accent-fg'
+            : 'grid size-7 place-items-center rounded-control bg-accent text-accent-fg'
         }
       >
-        <Headphones className={size === 'lg' ? 'size-6' : 'size-5'} strokeWidth={2.25} />
+        <Headphones className={size === 'lg' ? 'size-5.5' : 'size-4'} strokeWidth={2.25} />
       </span>
-      <span className={size === 'lg' ? 'text-2xl font-semibold tracking-tight' : 'text-base font-semibold tracking-tight'}>
+      <span className={size === 'lg' ? 'text-xl font-semibold tracking-tight' : 'text-[15px] font-semibold tracking-tight'}>
         Chaptarr
       </span>
     </div>

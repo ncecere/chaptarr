@@ -15,9 +15,9 @@ export function CoverGridSkeleton({ count = 12 }: { count?: number }) {
     <CoverGrid>
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="animate-pulse">
-          <div className="aspect-square rounded-lg bg-surface-2" />
-          <div className="mt-2 h-3.5 w-4/5 rounded bg-surface-2" />
-          <div className="mt-1.5 h-3 w-1/2 rounded bg-surface-2" />
+          <div className="aspect-square rounded-control bg-surface-2" />
+          <div className="mt-2 h-3.5 w-4/5 rounded-chip bg-surface-2" />
+          <div className="mt-1.5 h-3 w-1/2 rounded-chip bg-surface-2" />
         </div>
       ))}
     </CoverGrid>

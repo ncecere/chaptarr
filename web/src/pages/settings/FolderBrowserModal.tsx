@@ -31,7 +31,7 @@ export function FolderBrowserModal({ onClose }: { onClose: () => void }) {
           <span className="mr-auto min-w-0 truncate text-xs text-muted">
             {listing ? listing.path : ''}
           </span>
-          <Button onClick={onClose} disabled={add.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={add.isPending}>
             Cancel
           </Button>
           <Button
@@ -73,7 +73,7 @@ export function FolderBrowserModal({ onClose }: { onClose: () => void }) {
         </Button>
       </form>
 
-      <div className="h-72 overflow-y-auto rounded-lg border border-line bg-surface-2/40">
+      <div className="h-72 overflow-y-auto rounded-control border border-line bg-surface-2/40">
         {browse.isError && !listing ? (
           <ErrorState
             className="m-3 border-0 py-6"
@@ -94,7 +94,7 @@ export function FolderBrowserModal({ onClose }: { onClose: () => void }) {
                   onClick={() => go(d.path)}
                   className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors hover:bg-surface-3"
                 >
-                  <Folder className="size-4 shrink-0 text-accent" />
+                  <Folder className="size-4 shrink-0 text-faint" />
                   <span className="truncate">{d.name}</span>
                 </button>
               </li>

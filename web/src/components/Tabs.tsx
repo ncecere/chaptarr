@@ -13,7 +13,7 @@ export function TabNav({ items }: { items: { to: string; label: string; end?: bo
           end={it.end}
           className={({ isActive }) =>
             cn(
-              '-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors',
+              '-mb-px whitespace-nowrap rounded-t-control border-b-2 px-3 py-2 text-sm transition-colors',
               isActive
                 ? 'border-accent font-medium text-fg'
                 : 'border-transparent text-muted hover:text-fg',
@@ -47,7 +47,7 @@ export function StateTabs<T extends string>({
           aria-selected={value === t.value}
           onClick={() => onChange(t.value)}
           className={cn(
-            '-mb-px inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors',
+            '-mb-px inline-flex items-center gap-2 whitespace-nowrap rounded-t-control border-b-2 px-3 py-2 text-sm transition-colors',
             value === t.value
               ? 'border-accent font-medium text-fg'
               : 'border-transparent text-muted hover:text-fg',
@@ -75,7 +75,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex rounded-md border border-line-strong bg-surface p-0.5"
+      className="inline-flex h-8 items-center rounded-control border border-line-strong bg-surface-2 p-0.5 shadow-raised"
     >
       {options.map((o) => (
         <button
@@ -86,8 +86,8 @@ export function SegmentedControl<T extends string>({
           title={o.title}
           onClick={() => onChange(o.value)}
           className={cn(
-            'inline-flex h-7 items-center gap-1.5 rounded px-3 text-sm transition-colors',
-            value === o.value ? 'bg-surface-3 text-fg' : 'text-muted hover:text-fg',
+            'inline-flex h-6.5 items-center gap-1.5 rounded-chip px-2.5 text-sm transition-colors',
+            value === o.value ? 'bg-surface text-fg shadow-raised' : 'text-muted hover:text-fg',
           )}
         >
           {o.label}

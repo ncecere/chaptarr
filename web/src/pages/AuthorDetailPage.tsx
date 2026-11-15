@@ -108,19 +108,23 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
     <>
       <PageHeader back={{ to: '/authors', label: 'All authors' }} title={author.name} />
 
-      <section className="mb-8 flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row">
-        <Cover src={author.imageUrl} alt={author.name} kind="author" className="size-28 sm:size-36" />
+      <section className="mb-8 flex flex-col gap-5 rounded-card border border-line bg-surface p-4 sm:flex-row sm:p-5">
+        <Cover src={author.imageUrl} alt={author.name} kind="author" className="hidden size-36 sm:block" />
         <div className="min-w-0 flex-1 space-y-4">
-          <div className="max-w-md">
-            <ProgressBar
-              value={author.bookCount > 0 ? author.downloadedCount / author.bookCount : 0}
-              tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'}
-            />
-            <div className="mt-1 flex justify-between text-xs text-muted">
-              <span>
-                {author.downloadedCount} of {plural(author.bookCount, 'book')} downloaded
-              </span>
-              {author.missingCount > 0 && <span className="text-warn">{author.missingCount} missing</span>}
+          {/* On a phone the photo shrinks and sits beside the progress, so the page starts with content. */}
+          <div className="flex items-center gap-4">
+            <Cover src={author.imageUrl} alt="" kind="author" className="size-16 sm:hidden" />
+            <div className="min-w-0 max-w-md flex-1">
+              <ProgressBar label="Books downloaded"
+                value={author.bookCount > 0 ? author.downloadedCount / author.bookCount : 0}
+                tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'}
+              />
+              <div className="mt-1 flex justify-between text-xs text-muted">
+                <span>
+                  {author.downloadedCount} of {plural(author.bookCount, 'book')} downloaded
+                </span>
+                {author.missingCount > 0 && <span className="text-warn">{author.missingCount} missing</span>}
+              </div>
             </div>
           </div>
           {bio && <CollapsibleText text={bio} className="max-w-3xl" />}
@@ -163,7 +167,7 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
       </section>
 
       {selected.size > 0 && (
-        <div className="sticky top-14 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-accent/40 bg-surface-2 px-4 py-2.5 shadow-lg lg:top-2">
+        <div className="sticky top-14 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-card border border-line-strong bg-surface py-2 pr-2 pl-4 shadow-overlay lg:top-2">
           <span className="mr-auto text-sm font-medium">{selected.size} selected</span>
           <Button size="sm" loading={setMonitored.isPending} onClick={() => bulk(true)}>
             Monitor

@@ -27,11 +27,11 @@ export function FormatListEditor({
   return (
     <div className="max-w-sm space-y-2">
       {value.length === 0 ? (
-        <p className="rounded-md border border-dashed border-line-strong px-3 py-3 text-sm text-muted">
+        <p className="rounded-control border border-dashed border-line-strong px-3 py-3 text-sm text-muted">
           No preference — every format is treated equally.
         </p>
       ) : (
-        <ol className="divide-y divide-line overflow-hidden rounded-md border border-line-strong bg-surface-2">
+        <ol className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
           {value.map((f, i) => (
             <li key={f} className="flex items-center gap-2 py-1.5 pr-1.5 pl-3">
               <span className="w-5 text-xs text-faint tabular-nums">{i + 1}</span>
@@ -73,7 +73,7 @@ export function FormatListEditor({
               </option>
             ))}
           </Select>
-          <Button size="sm" icon={<Plus className="size-3.5" />} onClick={() => onChange([...value, choice])}>
+          <Button icon={<Plus className="size-4" />} onClick={() => onChange([...value, choice])}>
             Add
           </Button>
         </div>

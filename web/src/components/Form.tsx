@@ -2,10 +2,8 @@ import { Check } from 'lucide-react'
 import { useState, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react'
 import { cn } from '../lib/cn'
 
-const control =
-  'h-9 rounded-md border border-line-strong bg-surface-2 px-3 text-sm text-fg placeholder:text-faint ' +
-  'transition-colors hover:border-faint focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent ' +
-  'disabled:cursor-not-allowed disabled:opacity-50'
+// Sizing, border, focus ring and the select chevron live in index.css (.control).
+const control = 'control'
 
 /** Controls fill their container unless the caller sets a width of its own. */
 function sized(className?: string | false): string {
@@ -28,7 +26,7 @@ export function Field({
     <label className={cn('block', className)}>
       <span className="mb-1.5 block text-sm font-medium">{label}</span>
       {children}
-      {hint && <span className="mt-1.5 block text-xs text-muted">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-xs leading-relaxed text-muted">{hint}</span>}
     </label>
   )
 }
@@ -49,7 +47,7 @@ export function FieldGroup({
     <div className={className} role="group" aria-label={label}>
       <div className="mb-1.5 text-sm font-medium">{label}</div>
       {children}
-      {hint && <div className="mt-1.5 text-xs text-muted">{hint}</div>}
+      {hint && <div className="mt-1.5 text-xs leading-relaxed text-muted">{hint}</div>}
     </div>
   )
 }
@@ -60,7 +58,7 @@ export function Input({ className, ...rest }: InputHTMLAttributes<HTMLInputEleme
 
 export function Select({ className, children, ...rest }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select className={cn(sized(className), 'pr-8')} {...rest}>
+    <select className={sized(className)} {...rest}>
       {children}
     </select>
   )
