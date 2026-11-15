@@ -141,6 +141,7 @@ func Import(src, destDir, mode string, keepSource bool) ([]model.BookFile, error
 
 	type entry struct{ abs, rel string }
 	var audio, extras []entry
+	other := map[string]int{} // extensions of files that are not imported
 	if info.IsDir() {
 		err = filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
@@ -157,6 +158,9 @@ func Import(src, destDir, mode string, keepSource bool) ([]model.BookFile, error
 				audio = append(audio, entry{p, rel})
 			case sidecarExt[ext]:
 				extras = append(extras, entry{p, rel})
+				other[ext]++
+			default:
+				other[ext]++
 			}
 			return nil
 		})
@@ -167,7 +171,7 @@ func Import(src, destDir, mode string, keepSource bool) ([]model.BookFile, error
 		audio = append(audio, entry{src, filepath.Base(src)})
 	}
 	if len(audio) == 0 {
-		return nil, fmt.Errorf("no audio files found in %q (the download may be an archive or not an audiobook)", src)
+		return nil, fmt.Errorf("no audio files found in %q: %s", src, describeContents(other))
 	}
 	sort.Slice(audio, func(i, j int) bool { return audio[i].rel < audio[j].rel })
 
@@ -195,6 +199,47 @@ func Import(src, destDir, mode string, keepSource bool) ([]model.BookFile, error
 	}
 	return out, nil
 }
+
+// describeContents says what a download held instead of audio, so a failed
+// import explains itself without a shell on the server.
+func describeContents(byExt map[string]int) string {
+	if len(byExt) == 0 {
+		return "the folder is empty from Chaptarr's point of view; check that it is the same folder the download client wrote to, and that Chaptarr's user can read it"
+	}
+	exts := make([]string, 0, len(byExt))
+	archives := false
+	for ext := range byExt {
+		exts = append(exts, ext)
+		if archiveExt[ext] {
+			archives = true
+		}
+	}
+	sort.Slice(exts, func(i, j int) bool {
+		if byExt[exts[i]] != byExt[exts[j]] {
+			return byExt[exts[i]] > byExt[exts[j]]
+		}
+		return exts[i] < exts[j]
+	})
+	var parts []string
+	for i, ext := range exts {
+		if i == 6 {
+			parts = append(parts, "…")
+			break
+		}
+		name := ext
+		if name == "" {
+			name = "no extension"
+		}
+		parts = append(parts, fmt.Sprintf("%d × %s", byExt[ext], name))
+	}
+	msg := "it contains " + strings.Join(parts, ", ")
+	if archives {
+		msg += " (archives are not unpacked)"
+	}
+	return msg
+}
+
+var archiveExt = map[string]bool{".rar": true, ".zip": true, ".7z": true, ".r00": true, ".001": true}
 
 func transfer(src, dest string, move, link bool) (int64, error) {
 	si, err := os.Stat(src)

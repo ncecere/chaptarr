@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button, IconButton } from '../../components/Button'
 import { Select } from '../../components/Form'
 
-const KNOWN_FORMATS = ['m4b', 'mp3', 'm4a', 'flac', 'ogg', 'opus', 'aac', 'wma']
+const KNOWN_FORMATS = ['m4b', 'mp3', 'm4a', 'flac', 'ogg', 'opus', 'aac', 'wma', 'mp4']
 
 /** Ordered list of audio formats, most preferred first. */
 export function FormatListEditor({

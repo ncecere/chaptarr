@@ -12,7 +12,7 @@ import (
 
 // AudioFormats are the containers treated as audiobook files, on disk and in
 // release names.
-var AudioFormats = []string{"m4b", "mp3", "m4a", "flac", "opus", "ogg", "aac", "wma", "wav"}
+var AudioFormats = []string{"m4b", "mp3", "m4a", "flac", "opus", "ogg", "aac", "wma", "wav", "mp4", "mka"}
 
 var ebookWords = map[string]bool{
 	"epub": true, "mobi": true, "azw3": true, "azw": true, "pdf": true, "ebook": true, "cbz": true, "cbr": true,

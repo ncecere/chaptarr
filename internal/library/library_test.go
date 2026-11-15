@@ -1,7 +1,9 @@
 package library
 
 import (
+	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/ncecere/chaptarr/internal/model"
@@ -36,5 +38,35 @@ func TestBookFolder(t *testing.T) {
 	evil := &model.Book{Title: "..", AuthorName: "../../etc", ASIN: "B03"}
 	if got := BookFolder("{Author}/{Title}", evil); got != filepath.FromSlash("..-..-etc") {
 		t.Errorf("hostile metadata produced %q", got)
+	}
+}
+
+// Audio-only MP4 chapter files are a common usenet audiobook layout.
+func TestImportMP4Chapters(t *testing.T) {
+	src, dest := t.TempDir(), filepath.Join(t.TempDir(), "book")
+	for _, n := range []string{"Book 01-02.mp4", "Book 02-02.mp4", "cover.jpg"} {
+		if err := os.WriteFile(filepath.Join(src, n), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	files, err := Import(src, dest, "copy", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(files) != 2 || files[0].Format != "mp4" {
+		t.Fatalf("got %+v", files)
+	}
+}
+
+func TestImportErrorDescribesContents(t *testing.T) {
+	src := t.TempDir()
+	for _, n := range []string{"a.rar", "a.r00", "a.nfo"} {
+		if err := os.WriteFile(filepath.Join(src, n), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	_, err := Import(src, filepath.Join(t.TempDir(), "book"), "copy", true)
+	if err == nil || !strings.Contains(err.Error(), "1 × .rar") || !strings.Contains(err.Error(), "archives are not unpacked") {
+		t.Fatalf("got %v", err)
 	}
 }
