@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/ncecere/chaptarr/internal/library"
@@ -148,7 +149,9 @@ func (s *Service) syncAuthor(ctx context.Context, a *model.Author, monitorNew fu
 		return err
 	}
 	// The bio and photo are nice to have; the catalogue is what matters.
-	if info, err := s.Meta.Author(ctx, set.AudibleRegion, a.ASIN); err == nil {
+	if strings.HasPrefix(a.ASIN, "name:") {
+		// No catalogue id, so no bio to fetch.
+	} else if info, err := s.Meta.Author(ctx, set.AudibleRegion, a.ASIN); err == nil {
 		name := a.Name
 		if info.Name != "" {
 			name = info.Name
@@ -161,7 +164,12 @@ func (s *Service) syncAuthor(ctx context.Context, a *model.Author, monitorNew fu
 		s.Log.Warn("author details lookup failed", "author", a.Name, "error", err)
 	}
 
-	results, err := s.Meta.AuthorBooks(ctx, set.AudibleRegion, a.ASIN, a.Name, set.Language)
+	// An author known only by name (no catalogue id) is matched by name.
+	asin := a.ASIN
+	if strings.HasPrefix(asin, "name:") {
+		asin = ""
+	}
+	results, err := s.Meta.AuthorBooks(ctx, set.AudibleRegion, asin, a.Name, set.Language)
 	if err != nil {
 		return err
 	}
@@ -262,8 +270,21 @@ func (s *Service) AddBook(ctx context.Context, r AddBookRequest) (*model.Book, e
 	if err != nil {
 		return nil, upstream("Could not load the book: %v", err)
 	}
+	id, err := s.addResult(ctx, set, *res, r.Monitored)
+	if err != nil {
+		return nil, err
+	}
+	if r.SearchOnAdd {
+		s.searchInBackground([]int64{id})
+	}
+	return s.Store.Book(id)
+}
+
+// addResult files a catalogue entry under its lead author, creating the
+// author (unmonitored) if this is their first book in the library.
+func (s *Service) addResult(ctx context.Context, set model.Settings, res model.BookResult, monitored bool) (int64, error) {
 	if len(res.Authors) == 0 {
-		return nil, upstream("The catalogue lists no author for %q", res.Title)
+		return 0, upstream("The catalogue lists no author for %q", res.Title)
 	}
 	// File the book under its first credited author who has a catalogue id.
 	lead := res.Authors[0]
@@ -287,27 +308,118 @@ func (s *Service) AddBook(ctx context.Context, r AddBookRequest) (*model.Book, e
 		}
 	}
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	meta, err := s.bookMeta(*res)
+	meta, err := s.bookMeta(res)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-	id, err := s.Store.CreateBook(author.ID, meta, r.Monitored)
+	id, err := s.Store.CreateBook(author.ID, meta, monitored)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	s.Log.Info("book added", "title", res.Title, "author", author.Name)
-	if r.SearchOnAdd {
-		go func() {
-			if _, msg, err := s.SearchBook(context.Background(), id); err != nil {
-				s.Log.Warn("search on add failed", "title", res.Title, "error", err)
-			} else {
-				s.Log.Info("search on add", "title", res.Title, "result", msg)
+	return id, nil
+}
+
+// searchInBackground searches for each book in turn, pausing between them
+// as the scheduled search does.
+func (s *Service) searchInBackground(ids []int64) {
+	go func() {
+		for i, id := range ids {
+			if i > 0 {
+				time.Sleep(2 * time.Second)
 			}
-		}()
+			if _, msg, err := s.SearchBook(context.Background(), id); err != nil {
+				s.Log.Warn("search on add failed", "bookId", id, "error", err)
+				// No indexer or client: the rest would fail the same way.
+				if e, ok := err.(*Error); ok && e.Status == 400 {
+					return
+				}
+			} else {
+				s.Log.Info("search on add", "bookId", id, "result", msg)
+			}
+		}
+	}()
+}
+
+// ---------------------------------------------------------------- series
+
+// SeriesMissing lists the books of a series that are not in the library.
+func (s *Service) SeriesMissing(ctx context.Context, id int64) ([]model.BookResult, error) {
+	d, err := s.Store.SeriesDetail(id)
+	if err != nil {
+		return nil, notFound(err)
 	}
-	return s.Store.Book(id)
+	if strings.HasPrefix(d.ASIN, "name:") {
+		return nil, badRequest("The catalogue has no listing for the series %q, so its other books cannot be looked up.", d.Name)
+	}
+	set, err := s.Store.Settings()
+	if err != nil {
+		return nil, err
+	}
+	all, err := s.Meta.SeriesBooks(ctx, set.AudibleRegion, d.ASIN, d.Name, set.Language)
+	if err != nil {
+		return nil, upstream("Could not load the series: %v", err)
+	}
+	inLibrary, err := s.Store.BookIDsByASIN()
+	if err != nil {
+		return nil, err
+	}
+	// The library may hold another edition of a title, picked by hand.
+	titles, positions := map[string]bool{}, map[string]bool{}
+	for _, b := range d.Books {
+		titles[textutil.Normalize(b.Title)] = true
+		if b.Series != nil && b.Series.Position != "" {
+			positions[b.Series.Position] = true
+		}
+	}
+	missing := []model.BookResult{}
+	for _, r := range all {
+		if _, ok := inLibrary[r.ASIN]; ok || titles[textutil.Normalize(r.Title)] || positions[r.SeriesPosition] {
+			continue
+		}
+		missing = append(missing, r)
+	}
+	return missing, nil
+}
+
+type AddSeriesBooksRequest struct {
+	// ASINs limits what is added; empty adds every missing book.
+	ASINs       []string `json:"asins"`
+	Monitored   bool     `json:"monitored"`
+	SearchOnAdd bool     `json:"searchOnAdd"`
+}
+
+// AddSeriesBooks adds the series' missing books and returns how many.
+func (s *Service) AddSeriesBooks(ctx context.Context, id int64, r AddSeriesBooksRequest) (int, error) {
+	missing, err := s.SeriesMissing(ctx, id)
+	if err != nil {
+		return 0, err
+	}
+	set, err := s.Store.Settings()
+	if err != nil {
+		return 0, err
+	}
+	want := map[string]bool{}
+	for _, a := range r.ASINs {
+		want[a] = true
+	}
+	var ids []int64
+	for _, res := range missing {
+		if len(want) > 0 && !want[res.ASIN] {
+			continue
+		}
+		bookID, err := s.addResult(ctx, set, res, r.Monitored)
+		if err != nil {
+			return len(ids), err
+		}
+		ids = append(ids, bookID)
+	}
+	if r.SearchOnAdd && r.Monitored {
+		s.searchInBackground(ids)
+	}
+	return len(ids), nil
 }
 
 func (s *Service) BookDetail(id int64) (*model.BookDetail, error) {

@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Add missing books from a series.** The series page lists the books the catalogue has for the series that are not in your library, one edition per position, and adds the ones you tick.
+- **Add all books by an author.** An author who is in the library because you added one of their books now has an "Add All Books" action that imports the rest of their catalogue.
+- `GET /api/v1/series/{id}/missing` and `POST /api/v1/series/{id}/books`.
+
+### Changed
+
+- Status badges on covers are opaque, so they can be read over any artwork.
+- `mp4` is in the default preferred formats. An existing installation keeps its saved list; add MP4 under Settings → General.
+
+### Fixed
+
+- Following an author who was added without a catalogue id found none of their books.
+- The version in the sidebar was shown with a doubled "v".
+
 ## [0.1.0] - 2026-11-15
 
 The first release: follow authors, find their audiobooks on your indexers, download them and file them into a library.

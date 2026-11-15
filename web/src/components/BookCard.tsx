@@ -13,11 +13,11 @@ export function BookCard({ book }: { book: Book }) {
           alt={`Cover of ${book.title}`}
           className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:ring-accent/50"
         />
-        <BookStatusBadge status={book.status} className="absolute bottom-1.5 left-1.5 backdrop-blur-sm" />
+        <BookStatusBadge status={book.status} solid className="absolute bottom-1.5 left-1.5" />
         {!book.monitored && (
           <span
             title="Not monitored"
-            className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-black/60 text-muted backdrop-blur-sm"
+            className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-canvas text-fg shadow-md shadow-black/50 ring-1 ring-black/40"
           >
             <EyeOff className="size-3.5" />
           </span>

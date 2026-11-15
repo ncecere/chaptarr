@@ -88,6 +88,8 @@ func (s *Server) Handler() http.Handler {
 
 	authed("GET /api/v1/series", s.listSeries)
 	authed("GET /api/v1/series/{id}", s.getSeries)
+	authed("GET /api/v1/series/{id}/missing", s.seriesMissing)
+	authed("POST /api/v1/series/{id}/books", s.addSeriesBooks)
 
 	authed("GET /api/v1/queue", s.listQueue)
 	authed("DELETE /api/v1/queue/{id}", s.removeQueueItem)

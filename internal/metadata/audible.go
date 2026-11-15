@@ -280,6 +280,96 @@ func (c *Client) AuthorBooks(ctx context.Context, region, authorASIN, authorName
 	return dedupeEditions(all), nil
 }
 
+// SeriesBooks returns the books of a series in order, in the given language
+// ("" for any), one entry per work: a series lists every recording and
+// translation of each of its books.
+func (c *Client) SeriesBooks(ctx context.Context, region, seriesASIN, seriesName, language string) ([]model.BookResult, error) {
+	var out struct {
+		Product struct {
+			Relationships []struct {
+				ASIN     string `json:"asin"`
+				To       string `json:"relationship_to_product"`
+				Type     string `json:"relationship_type"`
+				Sequence string `json:"sequence"`
+				Sort     string `json:"sort"`
+			} `json:"relationships"`
+		} `json:"product"`
+	}
+	u := c.audibleURL(region) + "/1.0/catalog/products/" + url.PathEscape(seriesASIN) + "?response_groups=relationships"
+	if err := c.getJSON(ctx, u, &out); err != nil {
+		return nil, err
+	}
+	type child struct {
+		sequence string
+		sort     float64
+	}
+	children := map[string]child{}
+	var asins []string
+	for _, r := range out.Product.Relationships {
+		if r.To != "child" || r.Type != "series" || r.ASIN == "" {
+			continue
+		}
+		if _, dup := children[r.ASIN]; dup {
+			continue
+		}
+		n, _ := strconv.ParseFloat(r.Sort, 64)
+		children[r.ASIN] = child{r.Sequence, n}
+		asins = append(asins, r.ASIN)
+	}
+
+	var all []model.BookResult
+	const batch = 50
+	for i := 0; i < len(asins); i += batch {
+		ps, _, err := c.products(ctx, region, url.Values{
+			"asins":       {strings.Join(asins[i:min(i+batch, len(asins))], ",")},
+			"num_results": {strconv.Itoa(batch)},
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, p := range ps {
+			if !p.isBook() {
+				continue
+			}
+			r := p.toResult()
+			if language != "" && r.Language != "" && r.Language != language {
+				continue
+			}
+			if dramatizedRe.MatchString(r.Title) {
+				continue
+			}
+			// The book may sit in several series; file it under this one.
+			r.SeriesASIN, r.SeriesName, r.SeriesPosition = seriesASIN, seriesName, children[r.ASIN].sequence
+			all = append(all, r)
+		}
+	}
+	sort.Slice(all, func(i, j int) bool { return all[i].ASIN < all[j].ASIN })
+	all = dedupeEditions(all)
+	// Re-recordings are often retitled ("Old Man's War: Book 1"), so within
+	// a series the position identifies the work as well.
+	byPos := map[string]int{}
+	kept := all[:0]
+	for _, r := range all {
+		i, dup := byPos[r.SeriesPosition]
+		switch {
+		case r.SeriesPosition == "" || !dup:
+			byPos[r.SeriesPosition] = len(kept)
+			kept = append(kept, r)
+		case betterEdition(r, kept[i]):
+			kept[i] = r
+		}
+	}
+	all = kept
+	sort.SliceStable(all, func(i, j int) bool {
+		a, b := children[all[i].ASIN].sort, children[all[j].ASIN].sort
+		if a != b {
+			return a < b
+		}
+		return all[i].ReleaseDate < all[j].ReleaseDate
+	})
+	return all, nil
+}
+
 var dramatizedRe = regexp.MustCompile(`(?i)\bdramati[sz]ed adaptation\b`)
 
 func (c *Client) walkAuthor(ctx context.Context, region, authorName, sortBy string) ([]model.BookResult, error) {

@@ -1,4 +1,4 @@
-import { RefreshCw, Search, Trash2 } from 'lucide-react'
+import { ListPlus, RefreshCw, Search, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { BookTable, type BookSelection } from '../components/BookTable'
@@ -6,6 +6,7 @@ import { Button } from '../components/Button'
 import { CollapsibleText } from '../components/CollapsibleText'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { Cover } from '../components/Cover'
+import { ImportCatalogueModal } from '../components/ImportCatalogueModal'
 import { PageHeader } from '../components/PageHeader'
 import { ProgressBar } from '../components/ProgressBar'
 import { QueryView } from '../components/QueryView'
@@ -68,6 +69,7 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
   const del = useDeleteAuthor()
   const setMonitored = useSetBooksMonitored()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [selected, setSelected] = useState<ReadonlySet<number>>(new Set())
 
   const groups = useMemo(() => groupBooks(author.books), [author.books])
@@ -136,6 +138,9 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
             />
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button icon={<ListPlus className="size-4" />} onClick={() => setImportOpen(true)}>
+              Add All Books
+            </Button>
             <Button
               icon={<RefreshCw className="size-4" />}
               loading={refresh.isPending}
@@ -202,6 +207,8 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
           ))}
         </div>
       )}
+
+      {importOpen && <ImportCatalogueModal author={author} open onClose={() => setImportOpen(false)} />}
 
       <ConfirmDialog
         open={confirmDelete}

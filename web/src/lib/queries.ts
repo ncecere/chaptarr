@@ -36,6 +36,17 @@ export function useSeriesDetail(id: number) {
   return useQuery({ queryKey: ['seriesDetail', id], queryFn: () => api.seriesDetail(id) })
 }
 
+/** Asks the catalogue, so it is only fetched while the dialog is open. */
+export function useSeriesMissing(id: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['seriesMissing', id],
+    queryFn: () => api.seriesMissing(id),
+    enabled,
+    staleTime: 0,
+    retry: false,
+  })
+}
+
 /** Polls every 5s; TanStack pauses interval refetching while the tab is hidden. */
 export function useQueue() {
   return useQuery({ queryKey: ['queue'], queryFn: api.queue, refetchInterval: 5_000 })

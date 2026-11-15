@@ -82,7 +82,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </span>
         <div className="min-w-0 flex-1 leading-tight">
           <div className="truncate text-sm font-medium">{username}</div>
-          {status.data && <div className="truncate text-xs text-faint">v{status.data.version}</div>}
+          {status.data && <div className="truncate text-xs text-faint">{status.data.version}</div>}
         </div>
         <IconButton label="Sign out" loading={logout.isPending} onClick={() => logout.mutate()}>
           <LogOut className="size-4" />

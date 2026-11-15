@@ -290,7 +290,7 @@ func DefaultSettings() Settings {
 		AudibleRegion:                "us",
 		Language:                     "english",
 		FolderFormat:                 "{Author}/{Series}/{Title}",
-		PreferredFormats:             []string{"m4b", "mp3", "m4a", "flac", "opus"},
+		PreferredFormats:             []string{"m4b", "mp3", "m4a", "mp4", "flac", "opus"},
 		ImportMode:                   "hardlink",
 		MinSeeders:                   1,
 		MissingSearchIntervalMinutes: 360,

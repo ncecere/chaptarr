@@ -217,6 +217,14 @@ export interface AddAuthorRequest {
   searchOnAdd: boolean
 }
 
+export interface AddSeriesBooksRequest {
+  /** Which of the missing books to add; empty adds all of them. */
+  asins: string[]
+  monitored: boolean
+  /** Start an indexer search for the added books right away (monitored only). */
+  searchOnAdd: boolean
+}
+
 export interface AddBookRequest {
   asin: string
   monitored: boolean
@@ -494,6 +502,9 @@ export const api = {
   // series
   series: () => get<Series[]>('/series'),
   seriesDetail: (id: number) => get<SeriesDetail>(`/series/${id}`),
+  /** The series' books in the catalogue that are not in the library, in order. */
+  seriesMissing: (id: number) => get<BookResult[]>(`/series/${id}/missing`),
+  addSeriesBooks: (id: number, r: AddSeriesBooksRequest) => post<{ added: number }>(`/series/${id}/books`, r),
 
   // activity
   queue: () => get<QueueItem[]>('/queue'),

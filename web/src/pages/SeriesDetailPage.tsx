@@ -1,6 +1,9 @@
-import { useMemo } from 'react'
+import { ListPlus } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { AddSeriesBooksModal } from '../components/AddSeriesBooksModal'
 import { BookTable } from '../components/BookTable'
+import { Button } from '../components/Button'
 import { Cover } from '../components/Cover'
 import { PageHeader } from '../components/PageHeader'
 import { ProgressBar } from '../components/ProgressBar'
@@ -24,6 +27,7 @@ function SeriesBody({ series }: { series: SeriesDetail }) {
     [series.books],
   )
   useDocumentTitle(series.name)
+  const [addOpen, setAddOpen] = useState(false)
   return (
     <>
       <PageHeader
@@ -43,7 +47,11 @@ function SeriesBody({ series }: { series: SeriesDetail }) {
             tone={series.bookCount > 0 && series.downloadedCount === series.bookCount ? 'ok' : 'accent'}
           />
         </div>
+        <Button icon={<ListPlus className="size-4" />} onClick={() => setAddOpen(true)}>
+          Add Missing Books
+        </Button>
       </div>
+      {addOpen && <AddSeriesBooksModal series={series} open onClose={() => setAddOpen(false)} />}
       {books.length === 0 ? (
         <EmptyState title="No books in this series" />
       ) : (

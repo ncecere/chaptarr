@@ -2,6 +2,7 @@ import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-q
 import {
   api,
   type AddAuthorRequest,
+  type AddSeriesBooksRequest,
   type AddBookRequest,
   type DownloadClientInput,
   type IndexerInput,
@@ -109,6 +110,32 @@ export function useAddAuthor() {
     mutationFn: (r: AddAuthorRequest) => api.addAuthor(r),
     onSuccess: (author) => {
       toast.success(`Added ${author.name} with ${plural(author.books.length, 'book')}`)
+      return invalidateLibrary(qc)
+    },
+  })
+}
+
+/** Imports the full catalogue of an author who is already in the library. */
+export function useImportAuthorCatalogue() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { before: number; request: AddAuthorRequest }) => api.addAuthor(v.request),
+    onSuccess: (author, v) => {
+      const added = author.books.length - v.before
+      if (added > 0) toast.success(`Added ${plural(added, 'book')} by ${author.name}`)
+      else toast.info(`No other books by ${author.name} were found`)
+      return invalidateLibrary(qc)
+    },
+  })
+}
+
+export function useAddSeriesBooks() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { id: number; request: AddSeriesBooksRequest }) => api.addSeriesBooks(v.id, v.request),
+    onSuccess: (r, v) => {
+      toast.success(`Added ${plural(r.added, 'book')} to the series`)
+      void qc.invalidateQueries({ queryKey: ['seriesMissing', v.id] })
       return invalidateLibrary(qc)
     },
   })

@@ -237,6 +237,30 @@ func (s *Server) getSeries(w http.ResponseWriter, r *http.Request) (any, error) 
 	return s.store.SeriesDetail(id)
 }
 
+func (s *Server) seriesMissing(w http.ResponseWriter, r *http.Request) (any, error) {
+	id, err := pathID(r)
+	if err != nil {
+		return nil, err
+	}
+	return s.svc.SeriesMissing(r.Context(), id)
+}
+
+func (s *Server) addSeriesBooks(w http.ResponseWriter, r *http.Request) (any, error) {
+	id, err := pathID(r)
+	if err != nil {
+		return nil, err
+	}
+	var req service.AddSeriesBooksRequest
+	if err := decode(r, &req); err != nil {
+		return nil, err
+	}
+	added, err := s.svc.AddSeriesBooks(r.Context(), id, req)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]any{"added": added}, nil
+}
+
 // ---------------------------------------------------------------- activity
 
 func (s *Server) listQueue(w http.ResponseWriter, r *http.Request) (any, error) {

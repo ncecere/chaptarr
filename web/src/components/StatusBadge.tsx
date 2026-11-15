@@ -2,10 +2,18 @@ import type { BookStatus, HistoryEventType, QueueStatus } from '../lib/api'
 import { bookStatusMeta, historyTypeMeta, queueStatusMeta } from '../lib/status'
 import { Badge } from './Badge'
 
-export function BookStatusBadge({ status, className }: { status: BookStatus; className?: string }) {
+export function BookStatusBadge({
+  status,
+  solid,
+  className,
+}: {
+  status: BookStatus
+  solid?: boolean
+  className?: string
+}) {
   const m = bookStatusMeta[status]
   return (
-    <Badge tone={m.tone} className={className}>
+    <Badge tone={m.tone} solid={solid} className={className}>
       {m.label}
     </Badge>
   )
