@@ -108,19 +108,23 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
     <>
       <PageHeader back={{ to: '/authors', label: 'All authors' }} title={author.name} />
 
-      <section className="mb-8 flex flex-col gap-5 rounded-card border border-line bg-surface p-5 sm:flex-row">
-        <Cover src={author.imageUrl} alt={author.name} kind="author" className="size-28 sm:size-36" />
+      <section className="mb-8 flex flex-col gap-5 rounded-card border border-line bg-surface p-4 sm:flex-row sm:p-5">
+        <Cover src={author.imageUrl} alt={author.name} kind="author" className="hidden size-36 sm:block" />
         <div className="min-w-0 flex-1 space-y-4">
-          <div className="max-w-md">
-            <ProgressBar label="Books downloaded"
-              value={author.bookCount > 0 ? author.downloadedCount / author.bookCount : 0}
-              tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'}
-            />
-            <div className="mt-1 flex justify-between text-xs text-muted">
-              <span>
-                {author.downloadedCount} of {plural(author.bookCount, 'book')} downloaded
-              </span>
-              {author.missingCount > 0 && <span className="text-warn">{author.missingCount} missing</span>}
+          {/* On a phone the photo shrinks and sits beside the progress, so the page starts with content. */}
+          <div className="flex items-center gap-4">
+            <Cover src={author.imageUrl} alt="" kind="author" className="size-16 sm:hidden" />
+            <div className="min-w-0 max-w-md flex-1">
+              <ProgressBar label="Books downloaded"
+                value={author.bookCount > 0 ? author.downloadedCount / author.bookCount : 0}
+                tone={author.bookCount > 0 && author.downloadedCount === author.bookCount ? 'ok' : 'accent'}
+              />
+              <div className="mt-1 flex justify-between text-xs text-muted">
+                <span>
+                  {author.downloadedCount} of {plural(author.bookCount, 'book')} downloaded
+                </span>
+                {author.missingCount > 0 && <span className="text-warn">{author.missingCount} missing</span>}
+              </div>
             </div>
           </div>
           {bio && <CollapsibleText text={bio} className="max-w-3xl" />}
