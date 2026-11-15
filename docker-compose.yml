@@ -1,0 +1,18 @@
+# Chaptarr only talks to indexers and a download client you already run.
+# Mount your media so that Chaptarr and the download client see finished
+# downloads at the SAME path (here /data/...), which also lets imports use
+# hardlinks instead of copies.
+services:
+  chaptarr:
+    image: ghcr.io/ncecere/chaptarr:latest
+    build: . # `docker compose up -d --build` builds from source instead
+    container_name: chaptarr
+    user: "1000:1000" # must be able to write ./config and your library
+    environment:
+      - TZ=America/New_York
+    ports:
+      - "8789:8789"
+    volumes:
+      - ./config:/config
+      - /path/to/data:/data # contains both downloads/ and audiobooks/
+    restart: unless-stopped

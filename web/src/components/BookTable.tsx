@@ -1,0 +1,160 @@
+import { Link } from 'react-router-dom'
+import type { Book } from '../lib/api'
+import { cn } from '../lib/cn'
+import { formatBytes, formatDate, formatRuntime } from '../lib/format'
+import { MonitorToggle, SearchBookButton } from './BookActions'
+import { Checkbox } from './Checkbox'
+import { Cover } from './Cover'
+import { BookStatusBadge } from './StatusBadge'
+
+export interface BookSelection {
+  selected: ReadonlySet<number>
+  onToggle: (id: number) => void
+  onToggleMany: (ids: number[], on: boolean) => void
+}
+
+interface BookTableProps {
+  books: Book[]
+  showCover?: boolean
+  showAuthor?: boolean
+  showSeries?: boolean
+  /** Series position column; for lists already scoped to one series. */
+  showPosition?: boolean
+  showSize?: boolean
+  showMonitor?: boolean
+  showSearch?: boolean
+  selection?: BookSelection
+  className?: string
+}
+
+const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-faint'
+
+export function BookTable({
+  books,
+  showCover,
+  showAuthor,
+  showSeries,
+  showPosition,
+  showSize,
+  showMonitor,
+  showSearch,
+  selection,
+  className,
+}: BookTableProps) {
+  const ids = books.map((b) => b.id)
+  const selectedCount = selection ? ids.filter((id) => selection.selected.has(id)).length : 0
+  return (
+    <div className={cn('overflow-x-auto rounded-xl border border-line bg-surface', className)}>
+      <table className="w-full min-w-[34rem] border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-line">
+            {selection && (
+              <th className="w-10 py-2 pr-0 pl-3">
+                <Checkbox
+                  aria-label="Select all"
+                  checked={books.length > 0 && selectedCount === books.length}
+                  indeterminate={selectedCount > 0 && selectedCount < books.length}
+                  onChange={(on) => selection.onToggleMany(ids, on)}
+                />
+              </th>
+            )}
+            {showCover && <th className="w-14" />}
+            {showPosition && <th className={cn(th, 'w-14')}>#</th>}
+            <th className={th}>Title</th>
+            {showAuthor && <th className={cn(th, 'hidden lg:table-cell')}>Author</th>}
+            {showSeries && <th className={cn(th, 'hidden xl:table-cell')}>Series</th>}
+            <th className={cn(th, 'hidden md:table-cell')}>Released</th>
+            <th className={cn(th, 'hidden md:table-cell')}>Runtime</th>
+            {showSize && <th className={cn(th, 'hidden lg:table-cell')}>Size</th>}
+            <th className={th}>Status</th>
+            {showMonitor && <th className={cn(th, 'w-16')}>Monitor</th>}
+            {showSearch && <th className="w-12" />}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-line">
+          {books.map((b) => (
+            <tr key={b.id} className="transition-colors hover:bg-surface-2/60">
+              {selection && (
+                <td className="py-2 pr-0 pl-3">
+                  <Checkbox
+                    aria-label={`Select ${b.title}`}
+                    checked={selection.selected.has(b.id)}
+                    onChange={() => selection.onToggle(b.id)}
+                  />
+                </td>
+              )}
+              {showCover && (
+                <td className="py-2 pl-3">
+                  <Cover src={b.coverUrl} alt="" className="size-10 rounded" />
+                </td>
+              )}
+              {showPosition && (
+                <td className="px-3 py-2 text-muted tabular-nums">{b.series?.position || '—'}</td>
+              )}
+              <td className="max-w-0 min-w-48 px-3 py-2">
+                <Link to={`/books/${b.id}`} className="block truncate font-medium hover:text-accent" title={b.title}>
+                  {b.title}
+                </Link>
+                {(b.subtitle || showAuthor) && (
+                  <div className="truncate text-xs text-muted">
+                    {b.subtitle}
+                    {showAuthor && (
+                      <span className="lg:hidden">
+                        {b.subtitle ? ' · ' : ''}
+                        {b.authorName}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </td>
+              {showAuthor && (
+                <td className="hidden max-w-48 truncate px-3 py-2 text-muted lg:table-cell">
+                  <Link to={`/authors/${b.authorId}`} className="hover:text-fg">
+                    {b.authorName}
+                  </Link>
+                </td>
+              )}
+              {showSeries && (
+                <td className="hidden max-w-48 truncate px-3 py-2 text-muted xl:table-cell">
+                  {b.series ? (
+                    <Link to={`/series/${b.series.id}`} className="hover:text-fg">
+                      {b.series.name}
+                      {b.series.position && ` #${b.series.position}`}
+                    </Link>
+                  ) : (
+                    '—'
+                  )}
+                </td>
+              )}
+              <td className="hidden whitespace-nowrap px-3 py-2 text-muted md:table-cell">
+                {formatDate(b.releaseDate)}
+              </td>
+              <td className="hidden whitespace-nowrap px-3 py-2 text-muted md:table-cell">
+                {formatRuntime(b.runtimeMinutes)}
+              </td>
+              {showSize && (
+                <td className="hidden whitespace-nowrap px-3 py-2 text-muted lg:table-cell">
+                  {b.sizeBytes > 0 ? formatBytes(b.sizeBytes) : '—'}
+                  {b.format && <span className="ml-1.5 text-xs uppercase text-faint">{b.format}</span>}
+                </td>
+              )}
+              <td className="px-3 py-2">
+                <BookStatusBadge status={b.status} />
+              </td>
+              {showMonitor && (
+                <td className="px-3 py-2">
+                  <MonitorToggle book={b} />
+                </td>
+              )}
+              {showSearch && (
+                <td className="py-2 pr-3 text-right">
+                  <SearchBookButton bookId={b.id} title={b.title} />
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
