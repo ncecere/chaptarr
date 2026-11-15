@@ -24,6 +24,7 @@ func (s *Store) Settings() (model.Settings, error) {
 	// Unmarshal over the defaults so settings added in later versions keep
 	// their default until the user saves.
 	err = json.Unmarshal([]byte(data), &set)
+	set.MetadataSources = model.NormalizeSources(set.MetadataSources)
 	return set, err
 }
 

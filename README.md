@@ -28,6 +28,9 @@ services to run besides the indexers and download client you already have.
 
 Metadata comes from Audible's public catalogue; author photos and bios from
 [Audnexus](https://github.com/laxamentumtech/audnexus). Neither needs an account.
+Under Settings → Metadata you can switch on more sources beside Audible
+(iTunes, Open Library, and Google Books with an API key) for books it does
+not list, and point any of them at a mirror or self-hosted server.
 
 ## Quick start
 

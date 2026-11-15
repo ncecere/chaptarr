@@ -1,4 +1,4 @@
-import type { BookStatus, HistoryEventType, QueueStatus } from './api'
+import type { BookStatus, HistoryEventType, MetadataSourceType, QueueStatus } from './api'
 
 export type Tone = 'neutral' | 'accent' | 'ok' | 'warn' | 'bad' | 'info'
 
@@ -30,4 +30,20 @@ export const historyTypeMeta: Record<HistoryEventType, { label: string; tone: To
 export function seriesPositionValue(position: string | undefined): number {
   const m = position ? /\d+(\.\d+)?/.exec(position) : null
   return m ? parseFloat(m[0]) : Number.POSITIVE_INFINITY
+}
+
+/** Display names and catalogue-id prefixes of the metadata sources. */
+export const metadataSourceMeta: Record<MetadataSourceType, { label: string; idLabel: string; prefix: string }> = {
+  audible: { label: 'Audible', idLabel: 'ASIN', prefix: '' },
+  itunes: { label: 'iTunes', idLabel: 'iTunes ID', prefix: 'it:' },
+  openlibrary: { label: 'Open Library', idLabel: 'Open Library ID', prefix: 'ol:' },
+  googlebooks: { label: 'Google Books', idLabel: 'Google Books ID', prefix: 'gb:' },
+}
+
+/** The source a catalogue id belongs to; ids from sources other than Audible are prefixed. */
+export function sourceOfId(id: string): MetadataSourceType {
+  for (const type of ['itunes', 'openlibrary', 'googlebooks'] as const) {
+    if (id.startsWith(metadataSourceMeta[type].prefix)) return type
+  }
+  return 'audible'
 }

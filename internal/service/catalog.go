@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ncecere/chaptarr/internal/library"
+	"github.com/ncecere/chaptarr/internal/metadata"
 	"github.com/ncecere/chaptarr/internal/model"
 	"github.com/ncecere/chaptarr/internal/store"
 	"github.com/ncecere/chaptarr/internal/textutil"
@@ -14,25 +17,150 @@ import (
 
 // ---------------------------------------------------------------- metadata search
 
+// SearchBooks searches every enabled metadata source at once. Results keep
+// the sources' priority order; a book a higher source already lists is
+// dropped from the lower ones, after lending it any details it lacks.
 func (s *Service) SearchBooks(ctx context.Context, q string) ([]model.BookResult, error) {
 	set, err := s.Store.Settings()
 	if err != nil {
 		return nil, err
 	}
-	results, err := s.Meta.SearchBooks(ctx, set.AudibleRegion, q)
-	if err != nil {
-		return nil, upstream("Book search failed: %v", err)
+	sources := enabledSources(set)
+	found := make([][]model.BookResult, len(sources))
+	errs := make([]error, len(sources))
+	var wg sync.WaitGroup
+	for i, src := range sources {
+		wg.Add(1)
+		go func(i int, src model.MetadataSource) {
+			defer wg.Done()
+			if src.Type == model.SourceAudible {
+				found[i], errs[i] = s.Meta.SearchBooks(ctx, set.AudibleRegion, q)
+			} else {
+				found[i], errs[i] = s.Meta.SearchSource(ctx, sourceConfig(src), set.AudibleRegion, set.Language, q)
+			}
+		}(i, src)
 	}
+	wg.Wait()
+
 	ids, err := s.Store.BookIDsByASIN()
 	if err != nil {
 		return nil, err
 	}
-	for i := range results {
-		if id, ok := ids[results[i].ASIN]; ok {
-			results[i].LibraryBookID = &id
+	results := []model.BookResult{}
+	failed := 0
+	var lastErr error
+	for i, src := range sources {
+		if errs[i] != nil {
+			failed++
+			lastErr = fmt.Errorf("%s: %w", metadata.SourceName(src.Type), errs[i])
+			s.Log.Warn("metadata search failed", "source", src.Type, "error", errs[i])
+			continue
+		}
+	next:
+		for _, r := range found[i] {
+			if id, ok := ids[r.ASIN]; ok {
+				r.LibraryBookID = &id
+			}
+			for k := range results {
+				if results[k].Source != r.Source && metadata.SameWork(results[k], r) {
+					fillGaps(&results[k], r)
+					// The library may hold the other source's entry for it.
+					if results[k].LibraryBookID == nil {
+						results[k].LibraryBookID = r.LibraryBookID
+					}
+					continue next
+				}
+			}
+			results = append(results, r)
 		}
 	}
+	if failed == len(sources) && lastErr != nil {
+		return nil, upstream("Book search failed: %v", lastErr)
+	}
 	return results, nil
+}
+
+func enabledSources(set model.Settings) []model.MetadataSource {
+	var out []model.MetadataSource
+	for _, src := range set.MetadataSources {
+		if src.Enabled {
+			out = append(out, src)
+		}
+	}
+	return out
+}
+
+func sourceConfig(src model.MetadataSource) metadata.SourceConfig {
+	return metadata.SourceConfig{Type: src.Type, URL: src.URL, APIKey: src.APIKey}
+}
+
+// fillGaps copies details the entry lacks from another source's entry for
+// the same book.
+func fillGaps(r *model.BookResult, from model.BookResult) {
+	if r.Description == "" {
+		r.Description = from.Description
+	}
+	if r.CoverURL == "" {
+		r.CoverURL = from.CoverURL
+	}
+	if r.ReleaseDate == "" {
+		r.ReleaseDate = from.ReleaseDate
+	}
+	if r.Publisher == "" {
+		r.Publisher = from.Publisher
+	}
+	if r.Language == "" {
+		r.Language = from.Language
+	}
+}
+
+// enrich fills a book's missing description or cover from the other
+// enabled sources. It is best effort: a source that fails is skipped.
+func (s *Service) enrich(ctx context.Context, set model.Settings, r *model.BookResult) {
+	if (r.Description != "" && r.CoverURL != "") || len(r.Authors) == 0 {
+		return
+	}
+	query := textutil.MainTitle(r.Title) + " " + r.Authors[0].Name
+	for _, src := range enabledSources(set) {
+		if src.Type == r.Source {
+			continue
+		}
+		var found []model.BookResult
+		var err error
+		if src.Type == model.SourceAudible {
+			found, err = s.Meta.SearchBooks(ctx, set.AudibleRegion, query)
+		} else {
+			found, err = s.Meta.SearchSource(ctx, sourceConfig(src), set.AudibleRegion, set.Language, query)
+		}
+		if err != nil {
+			s.Log.Debug("metadata enrichment failed", "source", src.Type, "book", r.Title, "error", err)
+			continue
+		}
+		for _, f := range found {
+			if metadata.SameWork(*r, f) {
+				fillGaps(r, f)
+				break
+			}
+		}
+		if r.Description != "" && r.CoverURL != "" {
+			return
+		}
+	}
+}
+
+// lookupBook fetches one book from the source its id belongs to.
+func (s *Service) lookupBook(ctx context.Context, set model.Settings, id string) (*model.BookResult, error) {
+	typ := model.SourceOfID(id)
+	if typ == model.SourceAudible {
+		return s.Meta.Book(ctx, set.AudibleRegion, id)
+	}
+	for _, src := range set.MetadataSources {
+		if src.Type == typ {
+			// A source switched off since the search still resolves its ids.
+			return s.Meta.SourceBook(ctx, sourceConfig(src), set.AudibleRegion, id)
+		}
+	}
+	return nil, fmt.Errorf("unknown metadata source for %q", id)
 }
 
 func (s *Service) SearchAuthors(ctx context.Context, q string) ([]model.AuthorResult, error) {
@@ -181,7 +309,7 @@ func (s *Service) syncAuthor(ctx context.Context, a *model.Author, monitorNew fu
 	for _, b := range existing {
 		titles[textutil.Normalize(b.Title)] = true
 	}
-	added := 0
+	added, enriched := 0, 0
 	for _, r := range results {
 		meta, err := s.bookMeta(r)
 		if err != nil {
@@ -199,6 +327,15 @@ func (s *Service) syncAuthor(ctx context.Context, a *model.Author, monitorNew fu
 		// picked by hand); do not add a second copy of the same work.
 		if titles[textutil.Normalize(r.Title)] {
 			continue
+		}
+		// Fill a missing description or cover from the other sources, for
+		// a bounded number of books per sync.
+		if (r.Description == "" || r.CoverURL == "") && enriched < 10 {
+			enriched++
+			s.enrich(ctx, set, &r)
+			if meta, err = s.bookMeta(r); err != nil {
+				return err
+			}
 		}
 		if _, err := s.Store.CreateBook(a.ID, meta, monitorNew(r)); err != nil {
 			return err
@@ -266,7 +403,7 @@ func (s *Service) AddBook(ctx context.Context, r AddBookRequest) (*model.Book, e
 	if err != nil {
 		return nil, err
 	}
-	res, err := s.Meta.Book(ctx, set.AudibleRegion, r.ASIN)
+	res, err := s.lookupBook(ctx, set, r.ASIN)
 	if err != nil {
 		return nil, upstream("Could not load the book: %v", err)
 	}
@@ -294,9 +431,22 @@ func (s *Service) addResult(ctx context.Context, set model.Settings, res model.B
 			break
 		}
 	}
+	s.enrich(ctx, set, &res)
 	key := lead.ASIN
 	if key == "" {
 		key = "name:" + textutil.Normalize(lead.Name)
+		// Sources other than Audible name authors without an id. File the
+		// book under the author already in the library by that name.
+		all, err := s.Store.Authors()
+		if err != nil {
+			return 0, err
+		}
+		for _, a := range all {
+			if textutil.Normalize(a.Name) == textutil.Normalize(lead.Name) {
+				key = a.ASIN
+				break
+			}
+		}
 	}
 	author, err := s.Store.AuthorByASIN(key)
 	if errors.Is(err, store.ErrNotFound) {

@@ -14,6 +14,7 @@ import { BookStatusBadge } from '../components/StatusBadge'
 import type { BookDetail } from '../lib/api'
 import { formatBytes, formatDate, formatRuntime } from '../lib/format'
 import { useDocumentTitle } from '../lib/hooks'
+import { metadataSourceMeta, sourceOfId } from '../lib/status'
 import { useDeleteBook, useSearchBook } from '../lib/mutations'
 import { useBook } from '../lib/queries'
 import { htmlToText } from '../lib/text'
@@ -31,6 +32,7 @@ const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text
 
 function BookBody({ book }: { book: BookDetail }) {
   useDocumentTitle(book.title)
+  const source = metadataSourceMeta[sourceOfId(book.asin)]
   const navigate = useNavigate()
   const search = useSearchBook()
   const del = useDeleteBook()
@@ -103,7 +105,8 @@ function BookBody({ book }: { book: BookDetail }) {
             <Meta label="Released">{formatDate(book.releaseDate)}</Meta>
             {book.publisher && <Meta label="Publisher">{book.publisher}</Meta>}
             {book.language && <Meta label="Language">{book.language}</Meta>}
-            {book.asin && <Meta label="ASIN">{book.asin}</Meta>}
+            <Meta label="Metadata">{source.label}</Meta>
+            {book.asin && <Meta label={source.idLabel}>{book.asin.slice(source.prefix.length)}</Meta>}
             {book.path && (
               <Meta label="Location">
                 <span className="font-mono text-xs">{book.path}</span>

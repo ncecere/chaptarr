@@ -1,12 +1,14 @@
 import { Check, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Badge } from '../../components/Badge'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { Cover } from '../../components/Cover'
 import type { Book, BookResult } from '../../lib/api'
 import { formatRuntime, releaseYear } from '../../lib/format'
 import { useAddBook } from '../../lib/mutations'
+import { metadataSourceMeta } from '../../lib/status'
 import { htmlToText } from '../../lib/text'
 
 export function BookResultRow({ book }: { book: BookResult }) {
@@ -30,7 +32,12 @@ export function BookResultRow({ book }: { book: BookResult }) {
       <div className="flex gap-3 sm:gap-4">
         <Cover src={book.coverUrl} alt={`Cover of ${book.title}`} className="size-20 sm:size-24" />
         <div className="min-w-0 flex-1">
-          <h3 className="font-medium leading-snug">{book.title}</h3>
+          <h3 className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium leading-snug">
+            {book.title}
+            <Badge tone={book.source === 'audible' ? 'neutral' : 'info'} title="Metadata source">
+              {metadataSourceMeta[book.source].label}
+            </Badge>
+          </h3>
           {book.subtitle && <div className="text-xs text-muted">{book.subtitle}</div>}
           <div className="mt-1 text-sm text-muted">
             {book.authors.length > 0 ? book.authors.map((a) => a.name).join(', ') : 'Unknown author'}

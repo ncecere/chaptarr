@@ -178,6 +178,8 @@ export interface BookFilter {
 
 /** A book from the metadata provider that may or may not be in the library. */
 export interface BookResult {
+  /** Which metadata source the entry came from. */
+  source: MetadataSourceType
   asin: string
   title: string
   subtitle: string
@@ -372,7 +374,28 @@ export interface TestResult {
   message: string
 }
 
+export type MetadataSourceType = 'audible' | 'itunes' | 'openlibrary' | 'googlebooks'
+
+/**
+ * A place book metadata comes from. Audible is the primary catalogue (always
+ * enabled, always first); the others add books it does not list and fill in
+ * descriptions and covers it lacks.
+ */
+export interface MetadataSource {
+  type: MetadataSourceType
+  enabled: boolean
+  /** Custom server replacing the public endpoint; "" for the default. */
+  url: string
+  /** Write-only. Leave out (or send "") to keep the stored key. */
+  apiKey?: string
+  hasApiKey: boolean
+}
+
 export interface Settings {
+  /** In priority order. Search results from earlier sources come first. */
+  metadataSources: MetadataSource[]
+  /** Custom Audnexus server (author photos and bios); "" for the public one. */
+  audnexusUrl: string
   /** Audible marketplace used for metadata: us, uk, ca, au, de, fr, es, it, in, jp. */
   audibleRegion: string
   /** Only releases/books in this language are auto-added. "" means any. */
@@ -552,5 +575,8 @@ export const api = {
   runTask: (name: TaskName) => post<void>(`/system/tasks/${name}/run`),
   /** Most recent entries first. */
   logs: (limit = 200) => get<LogEntry[]>(`/system/logs${qs({ limit })}`),
+  /** Runs a small search against a source using the given (possibly unsaved) values. */
+  testMetadataSource: (r: { type: MetadataSourceType; url: string; apiKey: string }) =>
+    post<TestResult>('/settings/metadata/test', r),
   regenerateApiKey: () => post<{ apiKey: string }>('/system/apikey'),
 }

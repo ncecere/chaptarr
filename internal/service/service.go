@@ -96,6 +96,9 @@ func New(st *store.Store, log *slog.Logger, version, dataDir string) *Service {
 		clients:   map[int64]cachedClient{},
 	}
 	s.tasks = newTaskRunner(s)
+	if set, err := st.Settings(); err == nil {
+		s.configureMetadata(set)
+	}
 	return s
 }
 

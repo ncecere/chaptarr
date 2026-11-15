@@ -3,7 +3,10 @@
 // with the UI.
 package model
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 type User struct {
 	ID       int64  `json:"id"`
@@ -117,7 +120,11 @@ type AuthorRef struct {
 }
 
 type BookResult struct {
-	ASIN           string      `json:"asin"`
+	// ASIN is the catalogue id. For Audible it is the ASIN; other sources
+	// prefix theirs ("it:1442041162", "ol:OL5734647W", "gb:abc123").
+	ASIN string `json:"asin"`
+	// Source is the metadata source the entry came from (SourceAudible, ...).
+	Source         string      `json:"source"`
 	Title          string      `json:"title"`
 	Subtitle       string      `json:"subtitle"`
 	Authors        []AuthorRef `json:"authors"`
@@ -273,7 +280,87 @@ type TestResult struct {
 	Message string `json:"message"`
 }
 
+// Metadata sources. Audible is the primary catalogue: authors, series and
+// narrators come only from it. The others add books it does not list and
+// fill in descriptions and covers it lacks.
+const (
+	SourceAudible     = "audible"
+	SourceITunes      = "itunes"
+	SourceOpenLibrary = "openlibrary"
+	SourceGoogleBooks = "googlebooks"
+)
+
+type MetadataSource struct {
+	Type    string `json:"type"`
+	Enabled bool   `json:"enabled"`
+	// URL replaces the source's public endpoint, for a mirror or a
+	// self-hosted server. Empty uses the default.
+	URL string `json:"url"`
+	// APIKey is write-only in the API: responses carry HasAPIKey instead,
+	// and an empty value on save keeps the stored key.
+	APIKey    string `json:"apiKey,omitempty"`
+	HasAPIKey bool   `json:"hasApiKey"`
+}
+
+// SourceOfID tells which source a catalogue id belongs to.
+func SourceOfID(id string) string {
+	switch {
+	case strings.HasPrefix(id, "it:"):
+		return SourceITunes
+	case strings.HasPrefix(id, "ol:"):
+		return SourceOpenLibrary
+	case strings.HasPrefix(id, "gb:"):
+		return SourceGoogleBooks
+	}
+	return SourceAudible
+}
+
+func defaultSources() []MetadataSource {
+	return []MetadataSource{
+		{Type: SourceAudible, Enabled: true},
+		{Type: SourceITunes},
+		{Type: SourceOpenLibrary},
+		{Type: SourceGoogleBooks},
+	}
+}
+
+// NormalizeSources returns the list in the user's priority order with
+// Audible first and always enabled, unknown and repeated entries dropped,
+// and sources added in later versions appended, disabled.
+func NormalizeSources(in []MetadataSource) []MetadataSource {
+	known := map[string]bool{}
+	for _, d := range defaultSources() {
+		known[d.Type] = true
+	}
+	seen := map[string]bool{}
+	out := []MetadataSource{{Type: SourceAudible, Enabled: true}}
+	for _, m := range in {
+		if !known[m.Type] || seen[m.Type] {
+			continue
+		}
+		seen[m.Type] = true
+		m.HasAPIKey = m.APIKey != ""
+		if m.Type == SourceAudible {
+			m.Enabled = true
+			out[0] = m
+			continue
+		}
+		out = append(out, m)
+	}
+	seen[SourceAudible] = true
+	for _, d := range defaultSources() {
+		if !seen[d.Type] {
+			out = append(out, d)
+		}
+	}
+	return out
+}
+
 type Settings struct {
+	MetadataSources []MetadataSource `json:"metadataSources"`
+	// AudnexusURL replaces the public Audnexus server (author photos and
+	// biographies). Empty uses the default.
+	AudnexusURL                  string   `json:"audnexusUrl"`
 	AudibleRegion                string   `json:"audibleRegion"`
 	Language                     string   `json:"language"`
 	FolderFormat                 string   `json:"folderFormat"`
@@ -287,6 +374,7 @@ type Settings struct {
 
 func DefaultSettings() Settings {
 	return Settings{
+		MetadataSources:              defaultSources(),
 		AudibleRegion:                "us",
 		Language:                     "english",
 		FolderFormat:                 "{Author}/{Series}/{Title}",

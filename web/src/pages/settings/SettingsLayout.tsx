@@ -11,6 +11,7 @@ export function SettingsLayout() {
       <TabNav
         items={[
           { to: '/settings/general', label: 'General' },
+          { to: '/settings/metadata', label: 'Metadata' },
           { to: '/settings/rootfolders', label: 'Root Folders' },
           { to: '/settings/indexers', label: 'Indexers' },
           { to: '/settings/downloadclients', label: 'Download Clients' },

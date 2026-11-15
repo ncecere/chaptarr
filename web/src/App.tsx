@@ -16,6 +16,7 @@ import { SeriesPage } from './pages/SeriesPage'
 import { AccountSettings } from './pages/settings/AccountSettings'
 import { DownloadClientsSettings } from './pages/settings/DownloadClientsSettings'
 import { GeneralSettings } from './pages/settings/GeneralSettings'
+import { MetadataSettings } from './pages/settings/MetadataSettings'
 import { IndexersSettings } from './pages/settings/IndexersSettings'
 import { RootFoldersSettings } from './pages/settings/RootFoldersSettings'
 import { SettingsLayout } from './pages/settings/SettingsLayout'
@@ -41,6 +42,7 @@ export default function App() {
               <Route path="settings" element={<SettingsLayout />}>
                 <Route index element={<Navigate to="general" replace />} />
                 <Route path="general" element={<GeneralSettings />} />
+                <Route path="metadata" element={<MetadataSettings />} />
                 <Route path="rootfolders" element={<RootFoldersSettings />} />
                 <Route path="indexers" element={<IndexersSettings />} />
                 <Route path="downloadclients" element={<DownloadClientsSettings />} />

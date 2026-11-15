@@ -223,6 +223,10 @@ export function useUpdateSettings() {
   })
 }
 
+export function useTestMetadataSource() {
+  return useMutation({ mutationFn: api.testMetadataSource, meta: { silent: true } })
+}
+
 export function useAddRootFolder() {
   const qc = useQueryClient()
   return useMutation({

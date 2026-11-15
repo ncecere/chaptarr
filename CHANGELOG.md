@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-15
+
+More places to get book metadata from, next to Audible.
+
+### Added
+
+- **Metadata sources** (Settings → Metadata). Audible stays the primary catalogue; iTunes, Open Library and Google Books can be switched on beside it and put in order. Add New searches every enabled source and labels each result with where it came from. When two sources list the same book the higher one is shown, and the lower one fills in a description, cover, release date or publisher it lacks.
+  - Books added from another source have no narrator, runtime or series, so releases for them are matched on title and author only, without the size check.
+  - A book from another source is filed under the author already in the library by that name.
+  - Books from Audible that come without a description or cover are completed from the other sources when they are added.
+  - Google Books needs an API key; it no longer answers without one.
+- **Custom metadata servers.** Each source, and Audnexus (author photos and biographies), can point at a mirror or self-hosted server instead of the public one, with a Test button.
+- `POST /api/v1/settings/metadata/test`; `metadataSources` and `audnexusUrl` in the settings, and `source` on search results.
+
+### Changed
+
+- The Audible region and language moved from Settings → General to Settings → Metadata.
+- A book's id is shown with the name of its source instead of always as "ASIN".
+
 ## [0.2.0] - 2026-11-15
 
 Adding whole series and whole author catalogues, and status badges that can be read on covers.
@@ -42,6 +61,7 @@ The first release: follow authors, find their audiobooks on your indexers, downl
 - **API.** Everything the UI does is available under `/api/v1` with an `X-Api-Key` header.
 - **Container image** `ghcr.io/ncecere/chaptarr` for linux/amd64 and linux/arm64, signed with cosign, with an SBOM and build provenance; and binaries for Linux, macOS and Windows.
 
-[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/ncecere/chaptarr/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ncecere/chaptarr/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ncecere/chaptarr/releases/tag/v0.1.0

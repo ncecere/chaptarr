@@ -115,6 +115,7 @@ func (s *Server) Handler() http.Handler {
 
 	authed("GET /api/v1/settings", s.getSettings)
 	authed("PUT /api/v1/settings", s.putSettings)
+	authed("POST /api/v1/settings/metadata/test", s.testMetadataSource)
 
 	authed("GET /api/v1/system/status", s.status)
 	authed("GET /api/v1/system/tasks", s.listTasks)

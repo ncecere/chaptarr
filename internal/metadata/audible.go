@@ -43,6 +43,20 @@ type Client struct {
 	// AudibleBase and AudnexusBase override the real endpoints in tests.
 	AudibleBase  string
 	AudnexusBase string
+
+	// The user's custom servers (Settings → Metadata), set by Configure.
+	mu             sync.RWMutex
+	customAudible  string
+	customAudnexus string
+}
+
+// Configure sets the user's custom Audible and Audnexus servers; an empty
+// URL means the public one.
+func (c *Client) Configure(audibleURL, audnexusURL string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.customAudible = strings.TrimRight(audibleURL, "/")
+	c.customAudnexus = strings.TrimRight(audnexusURL, "/")
 }
 
 func New() *Client {
@@ -50,6 +64,12 @@ func New() *Client {
 }
 
 func (c *Client) audibleURL(region string) string {
+	c.mu.RLock()
+	custom := c.customAudible
+	c.mu.RUnlock()
+	if custom != "" {
+		return custom
+	}
 	if c.AudibleBase != "" {
 		return c.AudibleBase
 	}
@@ -61,6 +81,12 @@ func (c *Client) audibleURL(region string) string {
 }
 
 func (c *Client) audnexusURL() string {
+	c.mu.RLock()
+	custom := c.customAudnexus
+	c.mu.RUnlock()
+	if custom != "" {
+		return custom
+	}
 	if c.AudnexusBase != "" {
 		return c.AudnexusBase
 	}
@@ -68,9 +94,18 @@ func (c *Client) audnexusURL() string {
 }
 
 func (c *Client) getJSON(ctx context.Context, u string, out any) error {
+	return c.getJSONWith(ctx, u, nil, out)
+}
+
+// getJSONWith sends extra headers, which is where API keys go: a key in
+// the URL would end up in error messages and logs.
+func (c *Client) getJSONWith(ctx context.Context, u string, headers map[string]string, out any) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 	if err != nil {
 		return err
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "Chaptarr")
@@ -134,6 +169,7 @@ func (p product) isBook() bool {
 func (p product) toResult() model.BookResult {
 	r := model.BookResult{
 		ASIN:           p.ASIN,
+		Source:         model.SourceAudible,
 		Title:          strings.TrimSpace(p.Title),
 		Subtitle:       strings.TrimSpace(p.Sub),
 		Authors:        []model.AuthorRef{},

@@ -7,19 +7,6 @@ import { useUpdateSettings } from '../../lib/mutations'
 import { useRootFolders, useSettings } from '../../lib/queries'
 import { FormatListEditor } from './FormatListEditor'
 
-const REGIONS: { value: string; label: string }[] = [
-  { value: 'us', label: 'United States (us)' },
-  { value: 'uk', label: 'United Kingdom (uk)' },
-  { value: 'ca', label: 'Canada (ca)' },
-  { value: 'au', label: 'Australia (au)' },
-  { value: 'de', label: 'Germany (de)' },
-  { value: 'fr', label: 'France (fr)' },
-  { value: 'es', label: 'Spain (es)' },
-  { value: 'it', label: 'Italy (it)' },
-  { value: 'in', label: 'India (in)' },
-  { value: 'jp', label: 'Japan (jp)' },
-]
-
 const IMPORT_MODES: { value: Settings['importMode']; label: string; hint: string }[] = [
   {
     value: 'hardlink',
@@ -39,11 +26,6 @@ function GeneralForm({ settings, folders }: { settings: Settings; folders: RootF
   const dirty = JSON.stringify(draft) !== JSON.stringify(settings)
   const mode = IMPORT_MODES.find((m) => m.value === draft.importMode)
 
-  // Keep a region the server already has even if it is not in our list.
-  const regions = REGIONS.some((r) => r.value === draft.audibleRegion)
-    ? REGIONS
-    : [...REGIONS, { value: draft.audibleRegion, label: draft.audibleRegion }]
-
   return (
     <form
       className="max-w-2xl space-y-6"
@@ -52,25 +34,6 @@ function GeneralForm({ settings, folders }: { settings: Settings; folders: RootF
         save.mutate(draft)
       }}
     >
-      <Field label="Audible region" hint="Marketplace used for book and author metadata.">
-        <Select value={draft.audibleRegion} onChange={(e) => patch({ audibleRegion: e.target.value })}>
-          {regions.map((r) => (
-            <option key={r.value} value={r.value}>
-              {r.label}
-            </option>
-          ))}
-        </Select>
-      </Field>
-
-      <Field label="Language" hint="Only books and releases in this language are added automatically. Leave empty for any.">
-        <Input
-          value={draft.language}
-          onChange={(e) => patch({ language: e.target.value })}
-          placeholder="Any language"
-          className="max-w-xs"
-        />
-      </Field>
-
       <div>
         <Field
           label="Folder format"

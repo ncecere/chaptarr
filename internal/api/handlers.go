@@ -448,7 +448,29 @@ func (s *Server) deleteDownloadClient(w http.ResponseWriter, r *http.Request) (a
 }
 
 func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) (any, error) {
-	return s.store.Settings()
+	set, err := s.store.Settings()
+	return redactSettings(set), err
+}
+
+// redactSettings removes the metadata sources' API keys; HasAPIKey says
+// whether one is stored.
+func redactSettings(set model.Settings) model.Settings {
+	sources := make([]model.MetadataSource, len(set.MetadataSources))
+	for i, src := range set.MetadataSources {
+		src.HasAPIKey = src.APIKey != ""
+		src.APIKey = ""
+		sources[i] = src
+	}
+	set.MetadataSources = sources
+	return set
+}
+
+func (s *Server) testMetadataSource(w http.ResponseWriter, r *http.Request) (any, error) {
+	var req service.TestMetadataSourceRequest
+	if err := decode(r, &req); err != nil {
+		return nil, err
+	}
+	return s.svc.TestMetadataSource(r.Context(), req)
 }
 
 func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) (any, error) {
@@ -458,10 +480,18 @@ func (s *Server) putSettings(w http.ResponseWriter, r *http.Request) (any, error
 	if err != nil {
 		return nil, err
 	}
+	// Decoded into a fresh list: reusing the stored one would leave a
+	// reordered source holding another source's API key.
+	sources := set.MetadataSources
+	set.MetadataSources = nil
 	if err := decode(r, &set); err != nil {
 		return nil, err
 	}
-	return s.svc.UpdateSettings(set)
+	if set.MetadataSources == nil {
+		set.MetadataSources = sources
+	}
+	saved, err := s.svc.UpdateSettings(set)
+	return redactSettings(saved), err
 }
 
 // ---------------------------------------------------------------- system

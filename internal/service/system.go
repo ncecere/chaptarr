@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/fs"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -45,6 +47,32 @@ func (s *Service) Status(apiKey string) (*model.SystemStatus, error) {
 // ---------------------------------------------------------------- settings
 
 func (s *Service) UpdateSettings(set model.Settings) (model.Settings, error) {
+	stored, err := s.Store.Settings()
+	if err != nil {
+		return set, err
+	}
+	keys := map[string]string{}
+	for _, src := range stored.MetadataSources {
+		keys[src.Type] = src.APIKey
+	}
+	set.MetadataSources = model.NormalizeSources(set.MetadataSources)
+	for i := range set.MetadataSources {
+		src := &set.MetadataSources[i]
+		// An empty key on save means "unchanged": responses never carry it.
+		if src.APIKey = strings.TrimSpace(src.APIKey); src.APIKey == "" {
+			src.APIKey = keys[src.Type]
+		}
+		src.HasAPIKey = src.APIKey != ""
+		if src.URL, err = cleanServerURL(src.URL); err != nil {
+			return set, badRequest("%s server URL: %v", metadata.SourceName(src.Type), err)
+		}
+		if src.Type == model.SourceGoogleBooks && src.Enabled && src.APIKey == "" {
+			return set, badRequest("Google Books needs an API key before it can be switched on")
+		}
+	}
+	if set.AudnexusURL, err = cleanServerURL(set.AudnexusURL); err != nil {
+		return set, badRequest("Audnexus server URL: %v", err)
+	}
 	set.AudibleRegion = strings.ToLower(strings.TrimSpace(set.AudibleRegion))
 	if !metadata.ValidRegion(set.AudibleRegion) {
 		return set, badRequest("Unknown Audible region %q", set.AudibleRegion)
@@ -90,7 +118,84 @@ func (s *Service) UpdateSettings(set model.Settings) (model.Settings, error) {
 			return set, badRequest("The default root folder no longer exists")
 		}
 	}
-	return set, s.Store.SaveSettings(set)
+	if err := s.Store.SaveSettings(set); err != nil {
+		return set, err
+	}
+	s.configureMetadata(set)
+	return set, nil
+}
+
+// configureMetadata points the Audible and Audnexus lookups at the user's
+// custom servers, if any.
+func (s *Service) configureMetadata(set model.Settings) {
+	audible := ""
+	for _, src := range set.MetadataSources {
+		if src.Type == model.SourceAudible {
+			audible = src.URL
+		}
+	}
+	s.Meta.Configure(audible, set.AudnexusURL)
+}
+
+// cleanServerURL accepts an empty value or an http(s) URL, without a
+// trailing slash.
+func cleanServerURL(raw string) (string, error) {
+	raw = strings.TrimRight(strings.TrimSpace(raw), "/")
+	if raw == "" {
+		return "", nil
+	}
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return "", errors.New("enter a full address starting with http:// or https://")
+	}
+	return raw, nil
+}
+
+type TestMetadataSourceRequest struct {
+	Type   string `json:"type"`
+	URL    string `json:"url"`
+	APIKey string `json:"apiKey"`
+}
+
+// TestMetadataSource runs a small search against a source with the given,
+// possibly unsaved, settings.
+func (s *Service) TestMetadataSource(ctx context.Context, r TestMetadataSourceRequest) (model.TestResult, error) {
+	set, err := s.Store.Settings()
+	if err != nil {
+		return model.TestResult{}, err
+	}
+	base, err := cleanServerURL(r.URL)
+	if err != nil {
+		return model.TestResult{Message: capitalize(err.Error())}, nil
+	}
+	const query = "the hobbit tolkien"
+	var found []model.BookResult
+	switch r.Type {
+	case model.SourceAudible:
+		// A throwaway client, so the test does not disturb live lookups.
+		c := metadata.New()
+		c.Configure(base, "")
+		found, err = c.SearchBooks(ctx, set.AudibleRegion, query)
+	case model.SourceITunes, model.SourceOpenLibrary, model.SourceGoogleBooks:
+		key := strings.TrimSpace(r.APIKey)
+		if key == "" {
+			for _, src := range set.MetadataSources {
+				if src.Type == r.Type {
+					key = src.APIKey
+				}
+			}
+		}
+		found, err = s.Meta.SearchSource(ctx, metadata.SourceConfig{Type: r.Type, URL: base, APIKey: key}, set.AudibleRegion, set.Language, query)
+	default:
+		return model.TestResult{}, badRequest("Unknown metadata source %q", r.Type)
+	}
+	if err != nil {
+		return model.TestResult{Message: capitalize(err.Error())}, nil
+	}
+	if len(found) == 0 {
+		return model.TestResult{Message: "The server answered, but a search for “The Hobbit” found nothing"}, nil
+	}
+	return model.TestResult{OK: true, Message: fmt.Sprintf("Found %d results for “The Hobbit”", len(found))}, nil
 }
 
 // ---------------------------------------------------------------- root folders
