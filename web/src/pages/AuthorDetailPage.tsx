@@ -108,7 +108,7 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
     <>
       <PageHeader back={{ to: '/authors', label: 'All authors' }} title={author.name} />
 
-      <section className="mb-8 flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row">
+      <section className="mb-8 flex flex-col gap-5 rounded-card border border-line bg-surface p-5 sm:flex-row">
         <Cover src={author.imageUrl} alt={author.name} kind="author" className="size-28 sm:size-36" />
         <div className="min-w-0 flex-1 space-y-4">
           <div className="max-w-md">
@@ -163,7 +163,7 @@ function AuthorBody({ author }: { author: AuthorDetail }) {
       </section>
 
       {selected.size > 0 && (
-        <div className="sticky top-14 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-accent/40 bg-surface-2 px-4 py-2.5 shadow-lg lg:top-2">
+        <div className="sticky top-14 z-20 mb-4 flex flex-wrap items-center gap-2 rounded-card border border-line-strong bg-surface py-2 pr-2 pl-4 shadow-overlay lg:top-2">
           <span className="mr-auto text-sm font-medium">{selected.size} selected</span>
           <Button size="sm" loading={setMonitored.isPending} onClick={() => bulk(true)}>
             Monitor

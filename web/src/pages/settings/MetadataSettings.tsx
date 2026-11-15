@@ -1,7 +1,9 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { useState } from 'react'
+import { Badge } from '../../components/Badge'
 import { Button, IconButton } from '../../components/Button'
 import { Field, Input, SecretInput, Select } from '../../components/Form'
+import { FormActions } from '../../components/FormLayout'
 import { QueryView } from '../../components/QueryView'
 import { TestResultNote } from '../../components/TestResultNote'
 import { Toggle } from '../../components/Toggle'
@@ -75,14 +77,16 @@ function SourceCard({
   const missingKey = info.needsKey && !source.hasApiKey && !source.apiKey
 
   return (
-    <li className="rounded-xl border border-line bg-surface p-4">
+    <li className="rounded-card border border-line bg-surface p-4">
       <div className="flex items-start gap-3">
-        <span className="mt-0.5 w-5 shrink-0 text-center text-sm tabular-nums text-faint">{position + 1}</span>
+        <span className="mt-px grid size-5 shrink-0 place-items-center rounded-chip bg-surface-3 text-2xs font-medium tabular-nums text-muted">
+          {position + 1}
+        </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-medium">{metadataSourceMeta[source.type].label}</h3>
             {primary && (
-              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">Primary</span>
+              <Badge tone="accent">Primary</Badge>
             )}
           </div>
           <p className="mt-0.5 text-sm text-muted">{info.about}</p>
@@ -112,7 +116,7 @@ function SourceCard({
       </div>
 
       {(primary || source.enabled || info.needsKey) && (
-        <div className="mt-4 space-y-4 pl-8">
+        <div className="mt-4 space-y-4 border-t border-line pt-4 sm:ml-8">
           {children}
           {info.needsKey && (
             <Field
@@ -177,21 +181,20 @@ function MetadataForm({ settings }: { settings: Settings }) {
 
   return (
     <form
-      className="max-w-3xl"
       onSubmit={(e) => {
         e.preventDefault()
         save.mutate(draft)
       }}
     >
-      <div className="mb-4">
+      <div className="mb-4 max-w-3xl">
         <h2 className="text-base font-semibold">Metadata sources</h2>
-        <p className="mt-0.5 text-sm text-muted">
+        <p className="mt-1 text-sm leading-relaxed text-muted">
           Add New searches every source that is switched on, in this order. When two sources list the same book, the
           higher one is shown and the lower one fills in anything it lacks, such as a description or cover.
         </p>
       </div>
 
-      <ul className="space-y-3">
+      <ul className="max-w-3xl space-y-3">
         {sources.map((source, i) => (
           <SourceCard
             key={source.type}
@@ -240,14 +243,8 @@ function MetadataForm({ settings }: { settings: Settings }) {
         ))}
       </ul>
 
-      <div className="mt-6 flex gap-2 border-t border-line pt-5">
-        <Button type="submit" variant="primary" loading={save.isPending} disabled={!dirty}>
-          Save changes
-        </Button>
-        <Button variant="ghost" disabled={!dirty || save.isPending} onClick={() => setDraft(settings)}>
-          Discard
-        </Button>
-      </div>
+      <div className="mt-6" />
+      <FormActions dirty={dirty} saving={save.isPending} onDiscard={() => setDraft(settings)} />
     </form>
   )
 }

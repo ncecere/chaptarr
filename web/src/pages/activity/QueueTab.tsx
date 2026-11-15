@@ -1,8 +1,8 @@
-import { Download, FolderInput, RotateCw, Trash2 } from 'lucide-react'
+import { CircleAlert, Download, FolderInput, RotateCw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Badge } from '../../components/Badge'
-import { Button } from '../../components/Button'
+import { Button, IconButton } from '../../components/Button'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { Cover } from '../../components/Cover'
 import { ManualImportModal } from '../../components/ManualImportModal'
@@ -23,11 +23,11 @@ function QueueRow({ item, onRemove }: { item: QueueItem; onRemove: () => void })
   const tone = item.status === 'failed' ? 'bad' : item.status === 'paused' ? 'warn' : progress >= 1 ? 'ok' : 'accent'
 
   return (
-    <li className="flex gap-3 p-3 sm:gap-4 sm:p-4">
+    <li className="flex flex-wrap gap-3 p-3 sm:flex-nowrap sm:gap-4 sm:p-4">
       <Cover src={item.coverUrl} alt="" className="size-14 sm:size-16" />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-x-2">
-          <Link to={`/books/${item.bookId}`} className="font-medium hover:text-accent">
+          <Link to={`/books/${item.bookId}`} className="font-medium transition-colors hover:text-accent">
             {item.bookTitle}
           </Link>
           <span className="text-xs text-muted">{item.authorName}</span>
@@ -46,16 +46,21 @@ function QueueRow({ item, onRemove }: { item: QueueItem; onRemove: () => void })
         </div>
         <div className="mt-2.5 flex items-center gap-3">
           <ProgressBar value={progress} tone={tone} className="max-w-md flex-1" />
-          <span className="w-10 text-xs text-muted tabular-nums">{formatPercent(progress)}</span>
+          <span className="w-9 text-right text-xs text-muted tabular-nums">{formatPercent(progress)}</span>
           {item.status === 'downloading' && (
             <span className="text-xs text-muted tabular-nums" title="Estimated time remaining">
               ETA {formatEta(item.etaSeconds)}
             </span>
           )}
         </div>
-        {item.error && <p className="mt-2 break-words text-xs text-bad">{item.error}</p>}
+        {item.error && (
+          <p className="mt-2.5 flex max-w-2xl gap-2 rounded-control bg-bad/8 px-2.5 py-2 text-xs leading-relaxed text-muted">
+            <CircleAlert className="mt-px size-3.5 shrink-0 text-bad" />
+            <span className="min-w-0 break-words">{item.error}</span>
+          </p>
+        )}
       </div>
-      <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-start">
+      <div className="flex shrink-0 basis-full items-center justify-end gap-1.5 sm:basis-auto sm:items-start">
         {canRetry && (
           <Button
             size="sm"
@@ -69,9 +74,14 @@ function QueueRow({ item, onRemove }: { item: QueueItem; onRemove: () => void })
         <Button size="sm" icon={<FolderInput className="size-3.5" />} onClick={() => setManual(true)}>
           Manual Import
         </Button>
-        <Button size="sm" variant="danger" icon={<Trash2 className="size-3.5" />} onClick={onRemove}>
-          Remove
-        </Button>
+        <IconButton
+          size="sm"
+          label={`Remove ${item.bookTitle} from the queue`}
+          className="hover:bg-bad/10 hover:text-bad"
+          onClick={onRemove}
+        >
+          <Trash2 className="size-4" />
+        </IconButton>
       </div>
       {manual && (
         <ManualImportModal
@@ -103,7 +113,7 @@ export function QueueTab() {
         }
       >
         {(items) => (
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
             {items.map((it) => (
               <QueueRow key={it.id} item={it} onRemove={() => setRemoving(it)} />
             ))}

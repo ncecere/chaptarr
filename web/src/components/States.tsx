@@ -11,7 +11,7 @@ export function LoadingState({ label = 'Loading…', className }: { label?: stri
       role="status"
       className={cn('flex items-center justify-center gap-2.5 py-16 text-sm text-muted', className)}
     >
-      <Spinner className="size-5 text-accent" />
+      <Spinner className="size-4 text-muted" />
       {label}
     </div>
   )
@@ -33,12 +33,16 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center rounded-xl border border-dashed border-line-strong px-6 py-14 text-center',
+        'flex flex-col items-center rounded-card border border-dashed border-line-strong px-6 py-14 text-center',
         className,
       )}
     >
-      {icon && <div className="mb-3 text-faint [&>svg]:size-10 [&>svg]:stroke-1">{icon}</div>}
-      <h3 className="text-base font-medium">{title}</h3>
+      {icon && (
+        <div className="mb-4 grid size-11 place-items-center rounded-card bg-surface-2 text-muted [&>svg]:size-5">
+          {icon}
+        </div>
+      )}
+      <h3 className="text-base font-semibold">{title}</h3>
       {description && <p className="mt-1 max-w-md text-sm text-muted">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -60,12 +64,12 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        'flex flex-col items-center rounded-xl border border-bad/30 bg-bad/5 px-6 py-12 text-center',
+        'flex flex-col items-center rounded-card border border-bad/25 bg-bad/5 px-6 py-12 text-center',
         className,
       )}
     >
-      <CircleAlert className="mb-3 size-9 text-bad" strokeWidth={1.5} />
-      <h3 className="text-base font-medium">{title}</h3>
+      <CircleAlert className="mb-3 size-6 text-bad" />
+      <h3 className="text-base font-semibold">{title}</h3>
       {error !== undefined && <p className="mt-1 max-w-lg text-sm text-muted">{errorMessage(error)}</p>}
       {onRetry && (
         <Button className="mt-4" onClick={onRetry}>

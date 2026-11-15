@@ -17,7 +17,7 @@ export function BookCard({ book }: { book: Book }) {
         {!book.monitored && (
           <span
             title="Not monitored"
-            className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-canvas text-fg shadow-md shadow-black/50 ring-1 ring-black/40"
+            className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-surface text-muted shadow-overlay"
           >
             <EyeOff className="size-3.5" />
           </span>

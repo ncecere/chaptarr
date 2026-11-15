@@ -27,7 +27,7 @@ interface BookTableProps {
   className?: string
 }
 
-const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-faint'
+const th = 'th'
 
 export function BookTable({
   books,
@@ -44,10 +44,10 @@ export function BookTable({
   const ids = books.map((b) => b.id)
   const selectedCount = selection ? ids.filter((id) => selection.selected.has(id)).length : 0
   return (
-    <div className={cn('overflow-x-auto rounded-xl border border-line bg-surface', className)}>
+    <div className={cn('overflow-x-auto rounded-card border border-line bg-surface', className)}>
       <table className="w-full min-w-[34rem] border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line">
+          <tr className="border-b border-line bg-surface-2/50">
             {selection && (
               <th className="w-10 py-2 pr-0 pl-3">
                 <Checkbox
@@ -67,7 +67,7 @@ export function BookTable({
             <th className={cn(th, 'hidden md:table-cell')}>Runtime</th>
             {showSize && <th className={cn(th, 'hidden lg:table-cell')}>Size</th>}
             <th className={th}>Status</th>
-            {showMonitor && <th className={cn(th, 'w-16')}>Monitor</th>}
+            {showMonitor && <th className={cn(th, 'w-20')}>Monitor</th>}
             {showSearch && <th className="w-12" />}
           </tr>
         </thead>
@@ -85,14 +85,14 @@ export function BookTable({
               )}
               {showCover && (
                 <td className="py-2 pl-3">
-                  <Cover src={b.coverUrl} alt="" className="size-10 rounded" />
+                  <Cover src={b.coverUrl} alt="" className="size-9 rounded-chip" />
                 </td>
               )}
               {showPosition && (
-                <td className="px-3 py-2 text-muted tabular-nums">{b.series?.position || '—'}</td>
+                <td className="px-3 py-2 text-faint tabular-nums">{b.series?.position || '—'}</td>
               )}
-              <td className="max-w-0 min-w-48 px-3 py-2">
-                <Link to={`/books/${b.id}`} className="block truncate font-medium hover:text-accent" title={b.title}>
+              <td className="w-full max-w-0 min-w-48 px-3 py-2">
+                <Link to={`/books/${b.id}`} className="block truncate font-medium transition-colors hover:text-accent" title={b.title}>
                   {b.title}
                 </Link>
                 {(b.subtitle || showAuthor) && (
@@ -108,14 +108,14 @@ export function BookTable({
                 )}
               </td>
               {showAuthor && (
-                <td className="hidden max-w-48 truncate px-3 py-2 text-muted lg:table-cell">
+                <td className="hidden max-w-44 truncate whitespace-nowrap px-3 py-2 text-muted lg:table-cell">
                   <Link to={`/authors/${b.authorId}`} className="hover:text-fg">
                     {b.authorName}
                   </Link>
                 </td>
               )}
               {showSeries && (
-                <td className="hidden max-w-48 truncate px-3 py-2 text-muted xl:table-cell">
+                <td className="hidden max-w-44 truncate whitespace-nowrap px-3 py-2 text-muted xl:table-cell">
                   {b.series ? (
                     <Link to={`/series/${b.series.id}`} className="hover:text-fg">
                       {b.series.name}
@@ -126,20 +126,20 @@ export function BookTable({
                   )}
                 </td>
               )}
-              <td className="hidden whitespace-nowrap px-3 py-2 text-muted md:table-cell">
+              <td className="hidden whitespace-nowrap px-3 py-2 text-muted tabular-nums md:table-cell">
                 {formatDate(b.releaseDate)}
               </td>
-              <td className="hidden whitespace-nowrap px-3 py-2 text-muted md:table-cell">
+              <td className="hidden whitespace-nowrap px-3 py-2 text-muted tabular-nums md:table-cell">
                 {formatRuntime(b.runtimeMinutes)}
               </td>
               {showSize && (
-                <td className="hidden whitespace-nowrap px-3 py-2 text-muted lg:table-cell">
+                <td className="hidden whitespace-nowrap px-3 py-2 text-muted tabular-nums lg:table-cell">
                   {b.sizeBytes > 0 ? formatBytes(b.sizeBytes) : '—'}
-                  {b.format && <span className="ml-1.5 text-xs uppercase text-faint">{b.format}</span>}
+                  {b.format && <span className="ml-1.5 text-2xs font-medium uppercase tracking-wide text-faint">{b.format}</span>}
                 </td>
               )}
-              <td className="px-3 py-2">
-                <BookStatusBadge status={b.status} />
+              <td className="whitespace-nowrap px-3 py-2">
+                <BookStatusBadge status={b.status} dot />
               </td>
               {showMonitor && (
                 <td className="px-3 py-2">

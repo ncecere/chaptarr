@@ -14,7 +14,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (auth.isPending) {
     return (
       <div className="grid min-h-dvh place-items-center bg-canvas">
-        <Spinner className="size-6 text-accent" />
+        <Spinner className="size-5 text-muted" />
       </div>
     )
   }

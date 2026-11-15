@@ -1,11 +1,11 @@
 import { BookOpen, LayoutGrid, List, Search, ArrowDownAZ, ArrowUpAZ } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { BookCard } from '../components/BookCard'
 import { BookTable } from '../components/BookTable'
 import { IconButton } from '../components/Button'
 import { CoverGrid, CoverGridSkeleton } from '../components/CoverGrid'
 import { Input, Select } from '../components/Form'
+import { LinkButton } from '../components/LinkButton'
 import { PageHeader } from '../components/PageHeader'
 import { QueryView } from '../components/QueryView'
 import { EmptyState } from '../components/States'
@@ -155,12 +155,7 @@ export function LibraryPage() {
               title="Your library is empty"
               description="Search for an author or a book to start building your audiobook library."
               action={
-                <Link
-                  to="/add"
-                  className="inline-flex h-9 items-center rounded-md bg-accent px-3.5 text-sm font-medium text-accent-fg hover:bg-accent-hover"
-                >
-                  Add New
-                </Link>
+                <LinkButton to="/add">Add New</LinkButton>
               }
             />
           )

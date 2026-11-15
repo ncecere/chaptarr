@@ -9,7 +9,7 @@ import { api } from '../../lib/api'
 import { formatDateTime, formatDurationMs, formatInterval, formatRelative } from '../../lib/format'
 import { useRunTask } from '../../lib/mutations'
 
-const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-faint'
+const th = 'th'
 
 export function TasksTable() {
   // Right after Run is pressed the task may not report running yet, so keep polling briefly.
@@ -27,10 +27,10 @@ export function TasksTable() {
       <h2 className="mb-3 text-base font-semibold">Tasks</h2>
       <QueryView query={query}>
         {(tasks) => (
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+          <div className="overflow-x-auto rounded-card border border-line bg-surface">
             <table className="w-full min-w-[44rem] border-collapse text-sm">
               <thead>
-                <tr className="border-b border-line">
+                <tr className="border-b border-line bg-surface-2/50">
                   <th className={th}>Task</th>
                   <th className={th}>Schedule</th>
                   <th className={th}>Last run</th>

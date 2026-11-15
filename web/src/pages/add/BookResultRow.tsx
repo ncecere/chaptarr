@@ -1,10 +1,10 @@
 import { Check, Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Badge } from '../../components/Badge'
 import { Button } from '../../components/Button'
 import { Checkbox } from '../../components/Checkbox'
 import { Cover } from '../../components/Cover'
+import { LinkButton } from '../../components/LinkButton'
 import type { Book, BookResult } from '../../lib/api'
 import { formatRuntime, releaseYear } from '../../lib/format'
 import { useAddBook } from '../../lib/mutations'
@@ -28,7 +28,7 @@ export function BookResultRow({ book }: { book: BookResult }) {
   ].filter(Boolean)
 
   return (
-    <li className="rounded-xl border border-line bg-surface p-3 sm:p-4">
+    <li className="rounded-card border border-line bg-surface p-3 sm:p-4">
       <div className="flex gap-3 sm:gap-4">
         <Cover src={book.coverUrl} alt={`Cover of ${book.title}`} className="size-20 sm:size-24" />
         <div className="min-w-0 flex-1">
@@ -50,16 +50,11 @@ export function BookResultRow({ book }: { book: BookResult }) {
         </div>
         <div className="shrink-0">
           {libraryId !== null ? (
-            <Link
-              to={`/books/${libraryId}`}
-              className="inline-flex h-9 items-center gap-1.5 rounded-md border border-ok/30 bg-ok/10 px-3 text-sm text-ok hover:bg-ok/20"
-            >
-              <Check className="size-4" />
+            <LinkButton to={`/books/${libraryId}`} tone="ok" icon={<Check className="size-4" />}>
               In library
-            </Link>
+            </LinkButton>
           ) : (
             <Button
-              variant={optionsOpen ? 'secondary' : 'primary'}
               icon={<Plus className="size-4" />}
               onClick={() => setOptionsOpen(!optionsOpen)}
               aria-expanded={optionsOpen}
@@ -70,7 +65,7 @@ export function BookResultRow({ book }: { book: BookResult }) {
         </div>
       </div>
       {optionsOpen && libraryId === null && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-lg bg-surface-2 px-4 py-3">
+        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-control bg-surface-2 px-4 py-3">
           <Checkbox checked={monitored} onChange={setMonitored} label="Monitored" />
           <Checkbox checked={searchOnAdd} onChange={setSearchOnAdd} label="Search for the book now" />
           <div className="ml-auto flex gap-2">

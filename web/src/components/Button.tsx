@@ -2,19 +2,33 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { cn } from '../lib/cn'
 import { Spinner } from './Spinner'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+/**
+ * primary     the one main action of a view
+ * secondary   everything else that needs a visible button
+ * ghost       low-emphasis actions and icon buttons
+ * danger      destructive actions inline: quiet until hovered
+ * danger-solid  the confirming button of a destructive dialog
+ */
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-solid'
 type Size = 'sm' | 'md'
 
+const base =
+  'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-control font-medium select-none ' +
+  'transition-[color,background-color,border-color,box-shadow,transform] duration-150 active:scale-[0.98] ' +
+  'disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100'
+
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-fg hover:bg-accent-hover font-medium',
-  secondary: 'bg-surface-2 text-fg border border-line-strong hover:bg-surface-3',
-  ghost: 'text-muted hover:text-fg hover:bg-surface-2',
-  danger: 'bg-bad/15 text-bad border border-bad/30 hover:bg-bad/25',
+  primary: 'bg-accent text-accent-fg shadow-raised hover:bg-accent-hover',
+  secondary:
+    'border border-line-strong bg-surface-2 text-fg shadow-raised hover:border-faint/60 hover:bg-surface-3',
+  ghost: 'text-muted hover:bg-surface-2 hover:text-fg',
+  danger: 'border border-transparent text-bad hover:border-bad/25 hover:bg-bad/10',
+  'danger-solid': 'bg-bad text-on-status shadow-raised hover:bg-bad/85',
 }
 
 const sizes: Record<Size, string> = {
   sm: 'h-7 px-2.5 text-xs gap-1.5',
-  md: 'h-9 px-3.5 text-sm gap-2',
+  md: 'h-8 px-3 text-sm gap-1.5',
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -39,13 +53,8 @@ export function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={cn(
-        'inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-md transition-colors',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        variants[variant],
-        sizes[size],
-        className,
-      )}
+      aria-busy={loading || undefined}
+      className={cn(base, variants[variant], sizes[size], className)}
       {...rest}
     >
       {loading ? <Spinner className="size-3.5" /> : icon}
@@ -79,13 +88,8 @@ export function IconButton({
       aria-label={label}
       title={label}
       disabled={disabled || loading}
-      className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-md transition-colors',
-        'disabled:cursor-not-allowed disabled:opacity-50',
-        variants[variant],
-        size === 'sm' ? 'size-7' : 'size-9',
-        className,
-      )}
+      aria-busy={loading || undefined}
+      className={cn(base, variants[variant], size === 'sm' ? 'size-7' : 'size-8', className)}
       {...rest}
     >
       {loading ? <Spinner className="size-4" /> : children}

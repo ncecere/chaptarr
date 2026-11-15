@@ -35,7 +35,7 @@ function SeriesBody({ series }: { series: SeriesDetail }) {
         title={series.name}
         description={`${plural(series.bookCount, 'book')} · ${series.downloadedCount} downloaded`}
       />
-      <div className="mb-6 flex items-center gap-4 rounded-xl border border-line bg-surface p-4">
+      <div className="mb-6 flex items-center gap-4 rounded-card border border-line bg-surface p-4">
         <Cover src={series.coverUrl} alt="" kind="series" className="size-16" />
         <div className="min-w-0 flex-1 text-sm">
           <div className="text-muted">

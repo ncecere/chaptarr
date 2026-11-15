@@ -101,13 +101,13 @@ export function AddSeriesBooksModal({
               label="Select all"
             />
           </div>
-          <ul className="divide-y divide-line rounded-lg border border-line">
+          <ul className="divide-y divide-line overflow-hidden rounded-card border border-line">
             {books.map((b) => (
               <li key={b.asin}>
                 <label className="flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-surface-2">
                   <input
                     type="checkbox"
-                    className="size-4 shrink-0 rounded accent-accent"
+                    className="checkbox"
                     checked={!skipped.has(b.asin)}
                     disabled={add.isPending}
                     onChange={(e) => toggle(b.asin, e.target.checked)}

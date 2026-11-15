@@ -7,7 +7,7 @@ export function TestResultNote({ result, className }: { result: TestResult; clas
     <div
       role="status"
       className={cn(
-        'flex items-start gap-2 rounded-md border px-3 py-2 text-sm',
+        'flex items-start gap-2 rounded-control border px-3 py-2 text-sm',
         result.ok ? 'border-ok/30 bg-ok/8 text-ok' : 'border-bad/30 bg-bad/8 text-bad',
         className,
       )}

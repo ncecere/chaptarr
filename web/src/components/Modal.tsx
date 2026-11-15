@@ -72,7 +72,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', bus
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-[2px] animate-fade-in sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-scrim p-0 backdrop-blur-[3px] animate-fade-in sm:items-center sm:p-4"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !busy) onClose()
       }}
@@ -84,11 +84,11 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', bus
         tabIndex={-1}
         onKeyDown={trapTab}
         className={cn(
-          'flex max-h-[92vh] w-full flex-col rounded-t-xl border border-line-strong bg-surface shadow-2xl outline-none animate-pop-in sm:rounded-xl',
+          'flex max-h-[92vh] w-full flex-col rounded-t-dialog border border-line bg-surface shadow-overlay outline-none animate-pop-in sm:rounded-dialog',
           sizes[size],
         )}
       >
-        <div className="flex items-center justify-between gap-4 border-b border-line px-5 py-3.5">
+        <div className="flex items-center justify-between gap-4 border-b border-line py-3 pr-3 pl-5">
           <h2 className="min-w-0 truncate text-base font-semibold">{title}</h2>
           <IconButton label="Close" size="sm" onClick={onClose} disabled={busy}>
             <X className="size-4" />
@@ -96,7 +96,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md', bus
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">{children}</div>
         {footer && (
-          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-line px-5 py-3">
+          <div className="flex flex-wrap items-center justify-end gap-2 rounded-b-dialog border-t border-line bg-surface-2/50 px-5 py-3">
             {footer}
           </div>
         )}

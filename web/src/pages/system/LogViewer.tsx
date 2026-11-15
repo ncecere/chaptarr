@@ -56,13 +56,13 @@ export function LogViewer() {
         data={shown}
         isEmpty={(l) => l.length === 0}
         empty={
-          <p className="rounded-xl border border-dashed border-line-strong px-4 py-10 text-center text-sm text-muted">
+          <p className="rounded-card border border-dashed border-line-strong px-4 py-10 text-center text-sm text-muted">
             No log entries at this level.
           </p>
         }
       >
         {(entries) => (
-          <div className="max-h-[32rem] overflow-auto rounded-xl border border-line bg-surface">
+          <div className="max-h-[32rem] overflow-auto rounded-card border border-line bg-surface">
             <table className="w-full border-collapse font-mono text-xs">
               <tbody className="divide-y divide-line">
                 {entries.map((e, i) => (

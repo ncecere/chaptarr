@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Cover } from '../components/Cover'
 import { Input } from '../components/Form'
+import { LinkButton } from '../components/LinkButton'
 import { PageHeader } from '../components/PageHeader'
 import { ProgressBar } from '../components/ProgressBar'
 import { QueryView } from '../components/QueryView'
@@ -34,7 +35,7 @@ function AuthorCard({ author }: { author: Author }) {
   return (
     <Link
       to={`/authors/${author.id}`}
-      className="group flex flex-col items-center rounded-xl border border-line bg-surface p-4 text-center transition-colors hover:border-accent/50 hover:bg-surface-2"
+      className="group flex flex-col items-center rounded-card border border-line bg-surface p-4 text-center transition-colors hover:border-accent/50 hover:bg-surface-2"
     >
       <Cover src={author.imageUrl} alt={author.name} kind="author" className="mb-3 size-24" />
       <div className="mb-3 flex w-full items-center justify-center gap-1.5">
@@ -124,12 +125,7 @@ export function AuthorsPage() {
               title="No authors yet"
               description="Follow an author and Chaptarr will track their whole catalogue."
               action={
-                <Link
-                  to="/add"
-                  className="inline-flex h-9 items-center rounded-md bg-accent px-3.5 text-sm font-medium text-accent-fg hover:bg-accent-hover"
-                >
-                  Add New
-                </Link>
+                <LinkButton to="/add">Add New</LinkButton>
               }
             />
           )
@@ -143,7 +139,7 @@ export function AuthorsPage() {
               ))}
             </div>
           ) : (
-            <div className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+            <div className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
               {list.map((a) => (
                 <AuthorRow key={a.id} author={a} />
               ))}

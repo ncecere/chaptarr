@@ -18,7 +18,7 @@ export function PageHeader({
       {back && (
         <Link
           to={back.to}
-          className="mb-2 inline-flex items-center gap-0.5 text-xs text-muted transition-colors hover:text-fg"
+          className="-ml-1 mb-1.5 inline-flex items-center gap-0.5 rounded-chip px-1 py-0.5 text-xs text-muted transition-colors hover:text-fg"
         >
           <ChevronLeft className="size-3.5" />
           {back.label}
@@ -26,7 +26,7 @@ export function PageHeader({
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+          <h1 className="truncate text-xl font-semibold tracking-tight">{title}</h1>
           {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}

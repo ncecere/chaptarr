@@ -69,7 +69,7 @@ export function ImportCatalogueModal({
             value={monitor}
             onChange={(e) => setMonitor(e.target.value as MonitorMode)}
             disabled={add.isPending}
-            className="h-9 w-auto"
+            className="h-8 w-auto"
           >
             <option value="all">All books</option>
             <option value="future">Future books only</option>

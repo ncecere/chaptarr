@@ -42,11 +42,11 @@ function ConfirmInner({
       busy={pending}
       footer={
         <>
-          <Button onClick={onCancel} disabled={pending}>
+          <Button variant="ghost" onClick={onCancel} disabled={pending}>
             Cancel
           </Button>
           <Button
-            variant={danger ? 'danger' : 'primary'}
+            variant={danger ? 'danger-solid' : 'primary'}
             loading={pending}
             onClick={() => onConfirm(checked)}
           >

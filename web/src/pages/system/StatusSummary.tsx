@@ -5,7 +5,7 @@ import { useStatus } from '../../lib/queries'
 
 function Stat({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="rounded-xl border border-line bg-surface px-4 py-3">
+    <div className="rounded-card border border-line bg-surface px-4 py-3">
       <div className="text-xs text-muted">{label}</div>
       <div className="mt-0.5 truncate text-lg font-semibold tabular-nums">{children}</div>
     </div>

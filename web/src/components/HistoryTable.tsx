@@ -4,14 +4,14 @@ import { cn } from '../lib/cn'
 import { formatDateTime, formatRelative } from '../lib/format'
 import { HistoryTypeBadge } from './StatusBadge'
 
-const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-faint'
+const th = 'th'
 
 export function HistoryTable({ events, showBook }: { events: HistoryEvent[]; showBook?: boolean }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-line bg-surface">
+    <div className="overflow-x-auto rounded-card border border-line bg-surface">
       <table className="w-full min-w-[36rem] border-collapse text-sm">
         <thead>
-          <tr className="border-b border-line">
+          <tr className="border-b border-line bg-surface-2/50">
             <th className={th}>Event</th>
             {showBook && <th className={th}>Book</th>}
             <th className={th}>Details</th>
@@ -20,7 +20,7 @@ export function HistoryTable({ events, showBook }: { events: HistoryEvent[]; sho
         </thead>
         <tbody className="divide-y divide-line">
           {events.map((e) => (
-            <tr key={e.id} className="align-top hover:bg-surface-2/60">
+            <tr key={e.id} className="align-top transition-colors hover:bg-surface-2/60">
               <td className="px-3 py-2">
                 <HistoryTypeBadge type={e.type} />
               </td>

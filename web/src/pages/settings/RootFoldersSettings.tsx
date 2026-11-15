@@ -46,12 +46,12 @@ export function RootFoldersSettings() {
         }
       >
         {(folders) => (
-          <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+          <ul className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
             {folders.map((f) => {
               const used = f.totalBytes > 0 ? 1 - f.freeBytes / f.totalBytes : 0
               return (
                 <li key={f.id} className="flex items-center gap-4 p-4">
-                  <FolderOpen className="size-5 shrink-0 text-accent" />
+                  <FolderOpen className="size-4 shrink-0 text-muted" />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-mono text-sm break-all">{f.path}</span>

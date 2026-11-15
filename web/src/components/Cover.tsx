@@ -18,7 +18,7 @@ export function Cover({ src, alt, kind = 'book', className }: CoverProps) {
     <div
       className={cn(
         'relative aspect-square shrink-0 overflow-hidden bg-surface-2 ring-1 ring-inset ring-line',
-        kind === 'author' ? 'rounded-full' : 'rounded-lg',
+        kind === 'author' ? 'rounded-full' : 'rounded-control',
         className,
       )}
     >

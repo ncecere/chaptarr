@@ -27,7 +27,7 @@ export function ActivityPage() {
               <>
                 Queue
                 {queueCount > 0 && (
-                  <span className="rounded-full bg-accent px-1.5 text-xs font-semibold text-accent-fg tabular-nums">
+                  <span className="rounded-chip bg-accent/14 px-1.5 text-xs font-medium text-accent tabular-nums">
                     {queueCount}
                   </span>
                 )}

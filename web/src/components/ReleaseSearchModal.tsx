@@ -34,7 +34,7 @@ function SearchProgress({ label }: { label: string }) {
   )
 }
 
-function GrabButton({ bookId, release }: { bookId: number; release: Release }) {
+function GrabButton({ bookId, release, best }: { bookId: number; release: Release; best?: boolean }) {
   const m = useGrabRelease()
   if (m.isSuccess) {
     return (
@@ -48,7 +48,7 @@ function GrabButton({ bookId, release }: { bookId: number; release: Release }) {
   return (
     <Button
       size="sm"
-      variant={rejected ? 'secondary' : 'primary'}
+      variant={best && !rejected ? 'primary' : 'secondary'}
       loading={m.isPending}
       icon={<Download className="size-3.5" />}
       title={rejected ? 'Automatic search would skip this release' : undefined}
@@ -59,7 +59,7 @@ function GrabButton({ bookId, release }: { bookId: number; release: Release }) {
   )
 }
 
-const th = 'px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-faint whitespace-nowrap'
+const th = 'th'
 
 export function ReleaseSearchModal({
   bookId,
@@ -128,7 +128,7 @@ export function ReleaseSearchModal({
             label="Hide releases automatic search would skip"
             className="text-muted"
           />
-          <div className="overflow-x-auto rounded-lg border border-line">
+          <div className="overflow-x-auto rounded-card border border-line">
             <table className="w-full min-w-[56rem] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-line bg-surface-2/50">
@@ -146,8 +146,8 @@ export function ReleaseSearchModal({
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {shown.map((r) => (
-                  <ReleaseRow key={r.id} bookId={bookId} release={r} />
+                {shown.map((r, i) => (
+                  <ReleaseRow key={r.id} bookId={bookId} release={r} best={i === 0} />
                 ))}
               </tbody>
             </table>
@@ -163,7 +163,7 @@ export function ReleaseSearchModal({
   )
 }
 
-function ReleaseRow({ bookId, release: r }: { bookId: number; release: Release }) {
+function ReleaseRow({ bookId, release: r, best }: { bookId: number; release: Release; best?: boolean }) {
   const rejected = r.rejections.length > 0
   return (
     <tr className={cn('align-top transition-colors hover:bg-surface-2/60', rejected && 'bg-warn/4')}>
@@ -212,7 +212,7 @@ function ReleaseRow({ bookId, release: r }: { bookId: number; release: Release }
       <td className="px-3 py-2 whitespace-nowrap text-muted tabular-nums">{formatAge(r.ageDays)}</td>
       <td className="px-3 py-2 whitespace-nowrap text-muted tabular-nums">{r.score}</td>
       <td className="px-3 py-2 text-right">
-        <GrabButton bookId={bookId} release={r} />
+        <GrabButton bookId={bookId} release={r} best={best} />
       </td>
     </tr>
   )
