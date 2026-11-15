@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-15
+
+### Changed
+
+- The container image is based on Alpine 3.24 (was 3.22).
+
 ## [0.5.0] - 2026-11-15
 
 A visual overhaul: a light theme, one consistent set of controls, layouts that work on a phone, and an accessibility pass.
@@ -96,7 +102,8 @@ The first release: follow authors, find their audiobooks on your indexers, downl
 - **API.** Everything the UI does is available under `/api/v1` with an `X-Api-Key` header.
 - **Container image** `ghcr.io/ncecere/chaptarr` for linux/amd64 and linux/arm64, signed with cosign, with an SBOM and build provenance; and binaries for Linux, macOS and Windows.
 
-[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.5.1...HEAD
+[0.5.1]: https://github.com/ncecere/chaptarr/compare/v0.5.0...v0.5.1
 [0.5.0]: https://github.com/ncecere/chaptarr/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ncecere/chaptarr/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ncecere/chaptarr/compare/v0.2.0...v0.3.0
