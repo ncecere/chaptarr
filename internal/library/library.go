@@ -131,17 +131,59 @@ func tidy(seg string) string {
 // torrents that are still seeding); the mode then decides between hardlink
 // and copy. Nothing in the library is overwritten by a different file.
 func Import(src, destDir, mode string, keepSource bool) ([]model.BookFile, error) {
+	audio, extras, other, isDir, err := collect(src)
+	if err != nil {
+		return nil, err
+	}
+	if len(audio) == 0 {
+		return nil, fmt.Errorf("no audio files found in %q: %s", src, describeContents(other))
+	}
+	// A folder imported onto itself, or into its own subfolder, would
+	// overwrite or endlessly nest its files.
+	if rel, err := filepath.Rel(filepath.Clean(src), filepath.Clean(destDir)); err == nil && isDir &&
+		(rel == "." || !strings.HasPrefix(rel, "..")) {
+		return nil, fmt.Errorf("%q is already the book's library folder, or contains it; run a library scan instead", src)
+	}
+	sort.Slice(audio, func(i, j int) bool { return audio[i].rel < audio[j].rel })
+
+	if err := os.MkdirAll(destDir, 0o755); err != nil {
+		return nil, fmt.Errorf("creating library folder: %w", err)
+	}
+	move := mode == "move" && !keepSource
+	link := mode == "hardlink" || (mode == "move" && keepSource)
+
+	var out []model.BookFile
+	for _, e := range audio {
+		dest := filepath.Join(destDir, e.rel)
+		size, err := transfer(e.abs, dest, move, link)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, model.BookFile{Path: dest, SizeBytes: size, Format: Format(dest)})
+	}
+	for _, e := range extras {
+		// Sidecars are a nicety; failing on one would strand a good import.
+		_, _ = transfer(e.abs, filepath.Join(destDir, e.rel), move, link)
+	}
+	if move && isDir {
+		removeEmptyDirs(src)
+	}
+	return out, nil
+}
+
+type entry struct{ abs, rel string }
+
+// collect walks a download (a folder or a single file) and sorts its files
+// into audio, sidecars to carry along, and a count by extension of the rest.
+func collect(src string) (audio, extras []entry, other map[string]int, isDir bool, err error) {
 	info, err := os.Stat(src)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return nil, fmt.Errorf("download path %q does not exist from Chaptarr's point of view; if the download client runs in a container or on another machine, both must see the files at the same path", src)
+			return nil, nil, nil, false, fmt.Errorf("download path %q does not exist from Chaptarr's point of view; if the download client runs in a container or on another machine, both must see the files at the same path", src)
 		}
-		return nil, err
+		return nil, nil, nil, false, err
 	}
-
-	type entry struct{ abs, rel string }
-	var audio, extras []entry
-	other := map[string]int{} // extensions of files that are not imported
+	other = map[string]int{} // extensions of files that are not imported
 	if info.IsDir() {
 		err = filepath.WalkDir(src, func(p string, d fs.DirEntry, err error) error {
 			if err != nil {
@@ -165,39 +207,50 @@ func Import(src, destDir, mode string, keepSource bool) ([]model.BookFile, error
 			return nil
 		})
 		if err != nil {
-			return nil, fmt.Errorf("reading download: %w", err)
+			return nil, nil, nil, true, fmt.Errorf("reading download: %w", err)
 		}
 	} else if IsAudio(src) {
 		audio = append(audio, entry{src, filepath.Base(src)})
-	}
-	if len(audio) == 0 {
-		return nil, fmt.Errorf("no audio files found in %q: %s", src, describeContents(other))
+	} else {
+		other[strings.ToLower(filepath.Ext(src))]++
 	}
 	sort.Slice(audio, func(i, j int) bool { return audio[i].rel < audio[j].rel })
+	return audio, extras, other, info.IsDir(), nil
+}
 
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
-		return nil, fmt.Errorf("creating library folder: %w", err)
+// Contents is what a manual import would take from a path.
+type Contents struct {
+	Path       string        `json:"path"`
+	Files      []ContentFile `json:"files"`
+	TotalBytes int64         `json:"totalBytes"`
+	// Other describes what else is there, e.g. "it contains 3 × .rar".
+	Other string `json:"other"`
+}
+
+type ContentFile struct {
+	Name      string `json:"name"`
+	SizeBytes int64  `json:"sizeBytes"`
+}
+
+// Inspect lists the audio files under a path without importing anything.
+func Inspect(src string) (*Contents, error) {
+	audio, _, other, _, err := collect(src)
+	if err != nil {
+		return nil, err
 	}
-	move := mode == "move" && !keepSource
-	link := mode == "hardlink" || (mode == "move" && keepSource)
-
-	var out []model.BookFile
+	c := &Contents{Path: src, Files: []ContentFile{}}
 	for _, e := range audio {
-		dest := filepath.Join(destDir, e.rel)
-		size, err := transfer(e.abs, dest, move, link)
-		if err != nil {
-			return nil, err
+		var size int64
+		if fi, err := os.Stat(e.abs); err == nil {
+			size = fi.Size()
 		}
-		out = append(out, model.BookFile{Path: dest, SizeBytes: size, Format: Format(dest)})
+		c.Files = append(c.Files, ContentFile{Name: e.rel, SizeBytes: size})
+		c.TotalBytes += size
 	}
-	for _, e := range extras {
-		// Sidecars are a nicety; failing on one would strand a good import.
-		_, _ = transfer(e.abs, filepath.Join(destDir, e.rel), move, link)
+	if len(other) > 0 || len(audio) == 0 {
+		c.Other = describeContents(other)
 	}
-	if move && info.IsDir() {
-		removeEmptyDirs(src)
-	}
-	return out, nil
+	return c, nil
 }
 
 // describeContents says what a download held instead of audio, so a failed

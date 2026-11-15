@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/ncecere/chaptarr/internal/download"
 	"github.com/ncecere/chaptarr/internal/library"
@@ -117,7 +119,155 @@ func (s *Service) importItem(q *model.QueueItem, src string) error {
 	}
 	_ = s.Store.AddHistory(b, model.EventImported, q.ReleaseTitle, q.GUID, dir)
 	s.Log.Info("book imported", "book", b.Title, "files", len(files), "path", dir)
+	s.removeImported(q)
 	return s.Store.DeleteQueueItem(q.ID)
+}
+
+// removeImported clears an imported usenet download out of its client's
+// history, as Sonarr and Radarr do (SABnzbd moves the entry to its
+// archive). Torrents stay: they are still seeding. A failure only leaves
+// the job in the client's history.
+func (s *Service) removeImported(q *model.QueueItem) {
+	set, err := s.Store.Settings()
+	if err != nil || !set.RemoveCompletedDownloads || q.Protocol != model.ProtocolUsenet {
+		return
+	}
+	client, err := s.clientFor(q)
+	if err != nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := client.Remove(ctx, q.ClientItemID, true); err != nil && !errors.Is(err, download.ErrGone) {
+		s.Log.Warn("could not remove the imported download from the client", "client", q.DownloadClient, "release", q.ReleaseTitle, "error", err)
+	}
+}
+
+// ---------------------------------------------------------------- manual import
+
+// InspectImport lists the audio a manual import would take from a path. With
+// no path, it looks where the queue item's download client saved the download.
+func (s *Service) InspectImport(ctx context.Context, path string, queueID int64) (*library.Contents, error) {
+	path = strings.TrimSpace(path)
+	if path == "" && queueID != 0 {
+		q, err := s.Store.QueueItem(queueID)
+		if err != nil {
+			return nil, notFound(err)
+		}
+		client, err := s.clientFor(q)
+		if err != nil {
+			return nil, badRequest("%v", capitalize(err.Error()))
+		}
+		it, err := client.Status(ctx, q.ClientItemID)
+		if err != nil {
+			return nil, upstream("%s: %v", q.DownloadClient, err)
+		}
+		if it.Path == "" {
+			return nil, conflict("%s has not said where it saved this download yet. Enter the folder by hand.", q.DownloadClient)
+		}
+		path = it.Path
+	}
+	if path == "" {
+		return nil, badRequest("Enter the folder or file to import")
+	}
+	c, err := library.Inspect(path)
+	if err != nil {
+		return nil, badRequest("%v", capitalize(err.Error()))
+	}
+	return c, nil
+}
+
+type ManualImportRequest struct {
+	Path string `json:"path"`
+	// Mode is hardlink, copy or move; empty uses the configured import mode.
+	Mode string `json:"mode"`
+	// QueueID is the queue item this import settles, if any.
+	QueueID int64 `json:"queueId"`
+}
+
+// ManualImport files the audio at a path under a book, whatever the release
+// was called and wherever it was saved. It is the way out when an automatic
+// import cannot work.
+func (s *Service) ManualImport(ctx context.Context, bookID int64, r ManualImportRequest) (*model.BookDetail, error) {
+	b, err := s.Store.Book(bookID)
+	if err != nil {
+		return nil, notFound(err)
+	}
+	path := strings.TrimSpace(r.Path)
+	if path == "" {
+		return nil, badRequest("Enter the folder or file to import")
+	}
+	set, err := s.Store.Settings()
+	if err != nil {
+		return nil, err
+	}
+	mode := r.Mode
+	if mode == "" {
+		mode = set.ImportMode
+	}
+	switch mode {
+	case "hardlink", "copy", "move":
+	default:
+		return nil, badRequest("mode must be hardlink, copy or move")
+	}
+	var q *model.QueueItem
+	if r.QueueID != 0 {
+		if q, err = s.Store.QueueItem(r.QueueID); err != nil {
+			return nil, notFound(err)
+		}
+		if q.BookID != bookID {
+			return nil, badRequest("That queue item belongs to another book")
+		}
+	}
+	dir, err := s.bookDir(set, b)
+	if err != nil {
+		return nil, badRequest("%v", capitalize(err.Error()))
+	}
+
+	s.importMu.Lock()
+	defer s.importMu.Unlock()
+	// A torrent still in the client keeps seeding, so its files are never moved.
+	keepSource := q != nil && q.Protocol == model.ProtocolTorrent
+	files, err := library.Import(path, dir, mode, keepSource)
+	if err != nil {
+		return nil, &Error{Status: 422, Msg: "Import failed: " + err.Error()}
+	}
+	if err := s.Store.SetBookFiles(b.ID, dir, files); err != nil {
+		return nil, err
+	}
+	release, guid := filepath.Base(path), ""
+	if q != nil {
+		release, guid = q.ReleaseTitle, q.GUID
+	}
+	_ = s.Store.AddHistory(b, model.EventImported, release, guid, "Manual import from "+path)
+	s.Log.Info("book imported by hand", "book", b.Title, "files", len(files), "from", path, "path", dir)
+	if q != nil {
+		s.removeImported(q)
+		if err := s.Store.DeleteQueueItem(q.ID); err != nil && !errors.Is(err, store.ErrNotFound) {
+			return nil, err
+		}
+	}
+	return s.BookDetail(bookID)
+}
+
+// bookDir is the library folder a book is imported into.
+func (s *Service) bookDir(set model.Settings, b *model.Book) (string, error) {
+	roots, err := s.Store.RootFolders()
+	if err != nil {
+		return "", err
+	}
+	if len(roots) == 0 {
+		return "", errors.New("no root folder is configured; add one under Settings → Root Folders")
+	}
+	root := roots[0].Path
+	if set.DefaultRootFolderID != nil {
+		for _, r := range roots {
+			if r.ID == *set.DefaultRootFolderID {
+				root = r.Path
+			}
+		}
+	}
+	return filepath.Join(root, library.BookFolder(set.FolderFormat, b)), nil
 }
 
 func (s *Service) doImport(b *model.Book, q *model.QueueItem, src string) (string, []model.BookFile, error) {
@@ -128,22 +278,10 @@ func (s *Service) doImport(b *model.Book, q *model.QueueItem, src string) (strin
 	if err != nil {
 		return "", nil, err
 	}
-	roots, err := s.Store.RootFolders()
+	dir, err := s.bookDir(set, b)
 	if err != nil {
 		return "", nil, err
 	}
-	if len(roots) == 0 {
-		return "", nil, errors.New("no root folder is configured; add one under Settings → Root Folders")
-	}
-	root := roots[0].Path
-	if set.DefaultRootFolderID != nil {
-		for _, r := range roots {
-			if r.ID == *set.DefaultRootFolderID {
-				root = r.Path
-			}
-		}
-	}
-	dir := filepath.Join(root, library.BookFolder(set.FolderFormat, b))
 	// Torrents keep seeding from the download folder, so their files are
 	// never moved out from under the client.
 	keepSource := q.Protocol == model.ProtocolTorrent

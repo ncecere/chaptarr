@@ -283,6 +283,23 @@ func (s *Server) retryImport(w http.ResponseWriter, r *http.Request) (any, error
 	return nil, s.svc.RetryImport(r.Context(), id)
 }
 
+func (s *Server) inspectImport(w http.ResponseWriter, r *http.Request) (any, error) {
+	queueID, _ := strconv.ParseInt(r.URL.Query().Get("queueId"), 10, 64)
+	return s.svc.InspectImport(r.Context(), r.URL.Query().Get("path"), queueID)
+}
+
+func (s *Server) manualImport(w http.ResponseWriter, r *http.Request) (any, error) {
+	id, err := pathID(r)
+	if err != nil {
+		return nil, err
+	}
+	var req service.ManualImportRequest
+	if err := decode(r, &req); err != nil {
+		return nil, err
+	}
+	return s.svc.ManualImport(r.Context(), id, req)
+}
+
 func (s *Server) listHistory(w http.ResponseWriter, r *http.Request) (any, error) {
 	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
 	size, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))

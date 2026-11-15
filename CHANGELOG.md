@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-15
+
+A way out for downloads that will not import, and a tidy download client.
+
+### Added
+
+- **Manual import.** Every queue item, and every book page, has a Manual Import action: pick a folder (it starts in the download's own folder), see the audio files in it, choose move, copy or hardlink, and file them under the book. From the queue it also settles the queue item. A torrent that is still in the client is never moved, so it keeps seeding.
+- **Completed downloads are removed from the download client.** Once a usenet download has been imported, it is cleared out of the client's history (SABnzbd moves it to its archive). On by default; switch it off under Settings → General → Remove completed downloads. Torrents are never removed.
+- `GET /api/v1/manualimport` and `POST /api/v1/books/{id}/manualimport`; `removeCompletedDownloads` in the settings.
+
+### Changed
+
+- Importing a folder that is, or contains, the book's own library folder is refused instead of nesting the files inside themselves.
+
 ## [0.3.0] - 2026-11-15
 
 More places to get book metadata from, next to Audible.
@@ -61,7 +75,8 @@ The first release: follow authors, find their audiobooks on your indexers, downl
 - **API.** Everything the UI does is available under `/api/v1` with an `X-Api-Key` header.
 - **Container image** `ghcr.io/ncecere/chaptarr` for linux/amd64 and linux/arm64, signed with cosign, with an SBOM and build provenance; and binaries for Linux, macOS and Windows.
 
-[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/ncecere/chaptarr/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ncecere/chaptarr/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ncecere/chaptarr/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ncecere/chaptarr/releases/tag/v0.1.0

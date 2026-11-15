@@ -94,6 +94,8 @@ func (s *Server) Handler() http.Handler {
 	authed("GET /api/v1/queue", s.listQueue)
 	authed("DELETE /api/v1/queue/{id}", s.removeQueueItem)
 	authed("POST /api/v1/queue/{id}/import", s.retryImport)
+	authed("GET /api/v1/manualimport", s.inspectImport)
+	authed("POST /api/v1/books/{id}/manualimport", s.manualImport)
 	authed("GET /api/v1/history", s.listHistory)
 
 	authed("GET /api/v1/rootfolders", s.listRootFolders)

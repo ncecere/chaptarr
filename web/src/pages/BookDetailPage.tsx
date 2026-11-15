@@ -1,4 +1,4 @@
-import { Search, Trash2, Zap } from 'lucide-react'
+import { FolderInput, Search, Trash2, Zap } from 'lucide-react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { MonitorToggle } from '../components/BookActions'
@@ -7,6 +7,7 @@ import { CollapsibleText } from '../components/CollapsibleText'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { Cover } from '../components/Cover'
 import { HistoryTable } from '../components/HistoryTable'
+import { ManualImportModal } from '../components/ManualImportModal'
 import { PageHeader } from '../components/PageHeader'
 import { QueryView } from '../components/QueryView'
 import { ReleaseSearchModal } from '../components/ReleaseSearchModal'
@@ -38,6 +39,7 @@ function BookBody({ book }: { book: BookDetail }) {
   const del = useDeleteBook()
   const [interactive, setInteractive] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [manualImport, setManualImport] = useState(false)
   const description = useMemo(() => htmlToText(book.description), [book.description])
 
   const authors = book.authors.length > 0 ? book.authors : [book.authorName]
@@ -71,6 +73,9 @@ function BookBody({ book }: { book: BookDetail }) {
             </Button>
             <Button icon={<Search className="size-4" />} onClick={() => setInteractive(true)}>
               Interactive Search
+            </Button>
+            <Button icon={<FolderInput className="size-4" />} onClick={() => setManualImport(true)}>
+              Manual Import
             </Button>
             <Button variant="danger" icon={<Trash2 className="size-4" />} onClick={() => setConfirmDelete(true)}>
               Delete
@@ -170,6 +175,8 @@ function BookBody({ book }: { book: BookDetail }) {
         open={interactive}
         onClose={() => setInteractive(false)}
       />
+
+      {manualImport && <ManualImportModal book={book} onClose={() => setManualImport(false)} />}
 
       <ConfirmDialog
         open={confirmDelete}

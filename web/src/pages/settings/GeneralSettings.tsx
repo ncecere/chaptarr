@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '../../components/Button'
 import { Field, FieldGroup, Input, NumberInput, Select } from '../../components/Form'
 import { QueryView } from '../../components/QueryView'
+import { LabeledToggle } from '../../components/Toggle'
 import type { RootFolder, Settings } from '../../lib/api'
 import { useUpdateSettings } from '../../lib/mutations'
 import { useRootFolders, useSettings } from '../../lib/queries'
@@ -77,6 +78,13 @@ function GeneralForm({ settings, folders }: { settings: Settings; folders: RootF
           ))}
         </Select>
       </Field>
+
+      <LabeledToggle
+        label="Remove completed downloads"
+        hint="After importing, clear usenet downloads out of the download client's history. Torrents are left to seed."
+        checked={draft.removeCompletedDownloads}
+        onChange={(removeCompletedDownloads) => patch({ removeCompletedDownloads })}
+      />
 
       <Field label="Default root folder" hint="New books are imported here.">
         <Select

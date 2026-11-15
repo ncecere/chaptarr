@@ -47,6 +47,17 @@ export function useSeriesMissing(id: number, enabled: boolean) {
   })
 }
 
+/** `path` "" asks for the queue item's download folder. Disabled until there is something to look at. */
+export function useInspectImport(path: string, queueId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['inspectImport', path, queueId],
+    queryFn: () => api.inspectImport(path, queueId),
+    enabled,
+    staleTime: 0,
+    retry: false,
+  })
+}
+
 /** Polls every 5s; TanStack pauses interval refetching while the tab is hidden. */
 export function useQueue() {
   return useQuery({ queryKey: ['queue'], queryFn: api.queue, refetchInterval: 5_000 })

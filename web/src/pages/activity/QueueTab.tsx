@@ -1,10 +1,11 @@
-import { Download, RotateCw, Trash2 } from 'lucide-react'
+import { Download, FolderInput, RotateCw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Badge } from '../../components/Badge'
 import { Button } from '../../components/Button'
 import { ConfirmDialog } from '../../components/ConfirmDialog'
 import { Cover } from '../../components/Cover'
+import { ManualImportModal } from '../../components/ManualImportModal'
 import { ProgressBar } from '../../components/ProgressBar'
 import { QueryView } from '../../components/QueryView'
 import { EmptyState } from '../../components/States'
@@ -16,6 +17,7 @@ import { useQueue } from '../../lib/queries'
 
 function QueueRow({ item, onRemove }: { item: QueueItem; onRemove: () => void }) {
   const retry = useRetryImport()
+  const [manual, setManual] = useState(false)
   const canRetry = item.status === 'completed' || item.status === 'failed'
   const progress = item.status === 'completed' || item.status === 'importing' ? 1 : item.progress
   const tone = item.status === 'failed' ? 'bad' : item.status === 'paused' ? 'warn' : progress >= 1 ? 'ok' : 'accent'
@@ -64,10 +66,20 @@ function QueueRow({ item, onRemove }: { item: QueueItem; onRemove: () => void })
             Retry Import
           </Button>
         )}
+        <Button size="sm" icon={<FolderInput className="size-3.5" />} onClick={() => setManual(true)}>
+          Manual Import
+        </Button>
         <Button size="sm" variant="danger" icon={<Trash2 className="size-3.5" />} onClick={onRemove}>
           Remove
         </Button>
       </div>
+      {manual && (
+        <ManualImportModal
+          book={{ id: item.bookId, title: item.bookTitle }}
+          queueId={item.id}
+          onClose={() => setManual(false)}
+        />
+      )}
     </li>
   )
 }

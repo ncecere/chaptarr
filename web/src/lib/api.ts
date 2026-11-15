@@ -288,6 +288,24 @@ export interface QueueItem {
   addedAt: string
 }
 
+/** What a manual import would take from a path. */
+export interface ImportContents {
+  path: string
+  /** Audio files, with paths relative to `path`. */
+  files: { name: string; sizeBytes: number }[]
+  totalBytes: number
+  /** What else is there, e.g. "it contains 3 × .rar"; "" when nothing. */
+  other: string
+}
+
+export interface ManualImportRequest {
+  path: string
+  /** "" uses the configured import mode. */
+  mode: '' | Settings['importMode']
+  /** The queue item this import settles; 0 for none. */
+  queueId: number
+}
+
 export type HistoryEventType =
   | 'grabbed'
   | 'imported'
@@ -418,6 +436,8 @@ export interface Settings {
   authorRefreshIntervalHours: number
   /** Id of the root folder new books import into. Null until one exists. */
   defaultRootFolderId: number | null
+  /** Remove usenet downloads from the client's history once imported. Torrents are never removed. */
+  removeCompletedDownloads: boolean
 }
 
 // ---------------------------------------------------------------- system
@@ -578,5 +598,9 @@ export const api = {
   /** Runs a small search against a source using the given (possibly unsaved) values. */
   testMetadataSource: (r: { type: MetadataSourceType; url: string; apiKey: string }) =>
     post<TestResult>('/settings/metadata/test', r),
+  /** Lists the audio under a path. With no path, uses where the queue item's client saved the download. */
+  inspectImport: (path: string, queueId: number) =>
+    get<ImportContents>(`/manualimport${qs({ path: path || undefined, queueId: queueId || undefined })}`),
+  manualImport: (bookId: number, r: ManualImportRequest) => post<BookDetail>(`/books/${bookId}/manualimport`, r),
   regenerateApiKey: () => post<{ apiKey: string }>('/system/apikey'),
 }

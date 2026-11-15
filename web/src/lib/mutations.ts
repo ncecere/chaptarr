@@ -6,6 +6,7 @@ import {
   type AddBookRequest,
   type DownloadClientInput,
   type IndexerInput,
+  type ManualImportRequest,
   type Settings,
   type SystemStatus,
   type TaskName,
@@ -205,6 +206,18 @@ export function useRetryImport() {
     mutationFn: (id: number) => api.retryImport(id),
     onSuccess: () => {
       toast.success('Import retried')
+      return invalidateLibrary(qc)
+    },
+  })
+}
+
+export function useManualImport() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (v: { bookId: number; request: ManualImportRequest }) => api.manualImport(v.bookId, v.request),
+    meta: { silent: true },
+    onSuccess: (book) => {
+      toast.success(`Imported “${book.title}”`)
       return invalidateLibrary(qc)
     },
   })

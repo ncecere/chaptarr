@@ -23,6 +23,8 @@ services to run besides the indexers and download client you already have.
   sanity check; anything doubtful is left for you to pick by hand.
 - **Import** – finished downloads are hardlinked (or copied/moved) into
   `{Author}/{Series}/{Title}`, configurable. Torrents keep seeding.
+- **Manual import** – when a download will not import on its own, pick the
+  folder yourself and file it under the book.
 - **Library scan** – audiobooks already on disk are matched to books you add.
 - **Queue, history, wanted list, scheduled tasks and a log viewer.**
 

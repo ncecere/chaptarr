@@ -370,11 +370,16 @@ type Settings struct {
 	MissingSearchIntervalMinutes int      `json:"missingSearchIntervalMinutes"`
 	AuthorRefreshIntervalHours   int      `json:"authorRefreshIntervalHours"`
 	DefaultRootFolderID          *int64   `json:"defaultRootFolderId"`
+	// RemoveCompletedDownloads removes a usenet download from its client's
+	// history once it has been imported. Torrents are never removed: they
+	// keep seeding.
+	RemoveCompletedDownloads bool `json:"removeCompletedDownloads"`
 }
 
 func DefaultSettings() Settings {
 	return Settings{
 		MetadataSources:              defaultSources(),
+		RemoveCompletedDownloads:     true,
 		AudibleRegion:                "us",
 		Language:                     "english",
 		FolderFormat:                 "{Author}/{Series}/{Title}",
