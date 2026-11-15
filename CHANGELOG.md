@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-15
+
+A visual overhaul: a light theme, one consistent set of controls, layouts that work on a phone, and an accessibility pass.
+
 ### Added
 
 - **Light theme.** Chaptarr follows the operating system's light or dark setting, and the sidebar has a switch to force either.
@@ -92,7 +96,8 @@ The first release: follow authors, find their audiobooks on your indexers, downl
 - **API.** Everything the UI does is available under `/api/v1` with an `X-Api-Key` header.
 - **Container image** `ghcr.io/ncecere/chaptarr` for linux/amd64 and linux/arm64, signed with cosign, with an SBOM and build provenance; and binaries for Linux, macOS and Windows.
 
-[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/ncecere/chaptarr/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/ncecere/chaptarr/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ncecere/chaptarr/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/ncecere/chaptarr/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ncecere/chaptarr/compare/v0.1.0...v0.2.0
