@@ -21,7 +21,7 @@ ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
 	go build -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${COMMIT}" -o /chaptarr ./cmd/chaptarr
 
-FROM alpine:3.22
+FROM alpine:3.24
 RUN apk upgrade --no-cache && apk add --no-cache ca-certificates tzdata && adduser -D -u 1000 chaptarr \
 	&& mkdir -p /config && chown chaptarr /config
 COPY --from=build /chaptarr /usr/local/bin/chaptarr
